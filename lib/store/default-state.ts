@@ -1,7 +1,9 @@
-import { AppState, initialAppState } from './slices/app-slice';
+import { AppState, initialAppState } from '@/lib/store/slices/app-slice';
+import { initialUserState, UserState } from '@/lib/store/slices/user-slice';
 
-export type StoreState = AppState;
+export type StoreState = AppState & UserState;
 
-export const defaultState: AppState = {
+export const defaultState: StoreState = {
   ...initialAppState,
+  ...initialUserState,
 };

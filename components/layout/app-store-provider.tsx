@@ -1,20 +1,18 @@
 'use client';
 
 import { createContext, useContext, useRef, type ReactNode } from 'react';
-import { useStore as useZustandStore } from 'zustand';
+import { useStore as useZustandStore, type StoreApi } from 'zustand';
 
 import { createAppStore, initStore, Store } from '@/lib/store';
 
-export type AppStore = ReturnType<typeof createAppStore>;
-
-export const AppStoreContext = createContext<AppStore | null>(null);
+export const AppStoreContext = createContext<StoreApi<Store> | null>(null);
 
 export interface AppStoreProviderProps {
   children: ReactNode;
 }
 
 export const AppStoreProvider = ({ children }: AppStoreProviderProps) => {
-  const storeRef = useRef<AppStore>(null);
+  const storeRef = useRef<StoreApi<Store>>(null);
   if (!storeRef.current) storeRef.current = createAppStore(initStore());
 
   return (
@@ -24,12 +22,12 @@ export const AppStoreProvider = ({ children }: AppStoreProviderProps) => {
   );
 };
 
-export const useStore = <T,>(selector: (store: Store) => T): [T, AppStore] => {
+export const useStore = <T,>(selector: (store: Store) => T): T => {
   const appStoreContext = useContext(AppStoreContext);
 
   if (!appStoreContext) {
     throw new Error('useStore must be use within AppStoreProvider');
   }
 
-  return [useZustandStore(appStoreContext, selector), appStoreContext];
+  return useZustandStore(appStoreContext, selector);
 };
