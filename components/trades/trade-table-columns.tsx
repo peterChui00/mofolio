@@ -1,8 +1,8 @@
 'use client';
 
+import { ComputedTrade } from '@/types';
 import { ColumnDef } from '@tanstack/react-table';
 
-import { ComputedTrade } from '@/lib/store/slices/user-slice';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';

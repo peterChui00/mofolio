@@ -1,4 +1,4 @@
-import { ComputedTrade, Trade } from '@/lib/store/slices/user-slice';
+import { ComputedTrade, Trade } from '@/types';
 
 export const getTradeBySymbol = (trades: Trade[], symbol: string) => {
   return trades.find((trade) =>
