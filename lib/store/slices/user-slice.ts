@@ -1,6 +1,7 @@
 import { StateCreator } from 'zustand';
 
 import { Store } from '@/lib/store';
+import { getTradeById, getTradeBySymbol } from '@/lib/trade-utils';
 
 export type Order = {
   id: string;
@@ -22,14 +23,18 @@ export type Trade = {
   orders: Order[];
 };
 
-export const getTradeBySymbol = (trades: Trade[], symbol: string) => {
-  return trades.find((trade) =>
-    trade.orders.some((order) => order.symbol === symbol)
-  );
-};
-
-export const getTradeById = (trades: Trade[], id: string) => {
-  return trades.find((trade) => trade.id === id);
+export type ComputedTrade = {
+  id: string;
+  note: string;
+  tags: string[];
+  orders: Order[];
+  side: 'LONG' | 'SHORT' | null;
+  status: 'PENDING' | 'OPEN' | 'WIN' | 'LOSS';
+  symbol: string;
+  position: number;
+  pnl: number;
+  fee: number;
+  avgPrice: number | null;
 };
 
 export interface UserState {
