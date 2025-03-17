@@ -1,4 +1,10 @@
+import { Metadata } from 'next';
+
 import TradeTableContainer from '@/components/trades/trade-table-container';
+
+export const metadata: Metadata = {
+  title: 'Trades',
+};
 
 export default function TradesPage() {
   return (
