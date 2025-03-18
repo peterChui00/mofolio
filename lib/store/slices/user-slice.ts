@@ -10,6 +10,7 @@ export interface UserState {
 
 export type UserActions = {
   resetUserState(): void;
+  setTrades: (trades: Trade[]) => void;
   addOrder: (order: Order, tradeId?: string) => void;
 };
 
@@ -25,6 +26,8 @@ export const createUserSlice: StateCreator<Store, [], [], UserSlice> = (
 ) => ({
   ...initialUserState,
   resetUserState: () => set(initialUserState),
+
+  setTrades: (trades: Trade[]) => set({ trades }),
 
   addOrder: (order: Order, tradeId?: string) => {
     const trades = get().trades;
