@@ -1,11 +1,33 @@
 'use client';
 
 import { ComputedTrade } from '@/types';
-import { ColumnDef } from '@tanstack/react-table';
+import { ColumnDef, Row, SortingFn } from '@tanstack/react-table';
 
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+
+export const statusSortingOrder = {
+  OPEN: 2,
+  PENDING: 1,
+  WIN: 0,
+  LOSS: 0,
+};
+
+export const statusCompareFn = (
+  statusA: ComputedTrade['status'],
+  statusB: ComputedTrade['status']
+) => (statusSortingOrder[statusB] ?? 0) - (statusSortingOrder[statusA] ?? 0);
+
+const statusSortingFn: SortingFn<ComputedTrade> = (
+  rowA: Row<ComputedTrade>,
+  rowB: Row<ComputedTrade>,
+  columnId: string
+) => {
+  const statusA = rowA.getValue(columnId) as ComputedTrade['status'];
+  const statusB = rowB.getValue(columnId) as ComputedTrade['status'];
+  return statusCompareFn(statusA, statusB);
+};
 
 export const tradeTableColumns: ColumnDef<ComputedTrade>[] = [
   {
@@ -43,6 +65,7 @@ export const tradeTableColumns: ColumnDef<ComputedTrade>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
+    sortingFn: statusSortingFn,
   },
   {
     accessorKey: 'side',
