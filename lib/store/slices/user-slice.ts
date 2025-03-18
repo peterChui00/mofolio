@@ -2,7 +2,7 @@ import { Order, Trade } from '@/types';
 import { StateCreator } from 'zustand';
 
 import { Store } from '@/lib/store';
-import { getTradeById, getTradeBySymbol } from '@/lib/trade-utils';
+import { getOpenTradeBySymbol, getTradeById } from '@/lib/trade-utils';
 
 export interface UserState {
   trades: Trade[];
@@ -30,7 +30,7 @@ export const createUserSlice: StateCreator<Store, [], [], UserSlice> = (
     const trades = get().trades;
     const targetTrade = tradeId
       ? getTradeById(trades, tradeId)
-      : getTradeBySymbol(get().trades, order.symbol);
+      : getOpenTradeBySymbol(trades, order.symbol);
     if (targetTrade) {
       // Add order to existing trade
       return set((state) => ({

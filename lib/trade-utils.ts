@@ -1,18 +1,29 @@
 import { ComputedTrade, Trade } from '@/types';
 
-export const getTradeBySymbol = (trades: Trade[], symbol: string) => {
-  return trades.find((trade) =>
-    trade.orders.some((order) => order.symbol === symbol)
-  );
-};
+export const getTradeSymbol = (trade: Trade) => trade.orders[0]?.symbol || '';
 
-export const getTradeById = (trades: Trade[], id: string) => {
-  return trades.find((trade) => trade.id === id);
+export const getTradeById = (trades: Trade[], id: string) =>
+  trades.find((trade) => trade.id === id);
+
+export const getOpenTradeBySymbol = (trades: Trade[], symbol: string) =>
+  trades.find(
+    (trade) => getTradeSymbol(trade) === symbol && isOpenTrade(trade)
+  );
+
+export const isOpenTrade = (trade: Trade) => {
+  const position = trade.orders.reduce(
+    (acc, order) =>
+      order.status === 'FILLED'
+        ? acc + (order.type === 'BUY' ? order.quantity : -order.quantity)
+        : acc,
+    0
+  );
+  return position !== 0;
 };
 
 export const computeTradeData = (trade: Trade): ComputedTrade => {
   // Extract symbol from the first order, default to empty string if no orders exist
-  const symbol = trade.orders.length > 0 ? trade.orders[0].symbol : '';
+  const symbol = getTradeSymbol(trade);
 
   const filledOrders = trade.orders
     .filter((order) => order.status === 'FILLED')
