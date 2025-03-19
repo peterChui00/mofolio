@@ -2,8 +2,10 @@
 
 import { ComputedTrade } from '@/types';
 import { ColumnDef, Row, SortingFn } from '@tanstack/react-table';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
 
@@ -53,6 +55,22 @@ export const tradeTableColumns: ColumnDef<ComputedTrade>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
+  },
+  {
+    id: 'expander',
+    cell: ({ row }) => {
+      return (
+        row.getCanExpand() && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={row.getToggleExpandedHandler()}
+          >
+            {row.getIsExpanded() ? <ChevronDown /> : <ChevronRight />}
+          </Button>
+        )
+      );
+    },
   },
   {
     accessorKey: 'status',

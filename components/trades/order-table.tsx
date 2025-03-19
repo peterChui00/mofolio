@@ -1,13 +1,11 @@
 'use client';
 
-import { Fragment, useState } from 'react';
-import { ComputedTrade } from '@/types';
+import { useState } from 'react';
 import {
   ColumnDef,
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getExpandedRowModel,
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
@@ -18,7 +16,6 @@ import {
   VisibilityState,
 } from '@tanstack/react-table';
 
-import { cn } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -27,17 +24,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { DataTablePagination } from '@/components/data-table/data-table-pagination';
-import { OrderTable } from '@/components/trades/order-table';
-import { orderTableColumns } from '@/components/trades/order-table-columns';
-import { TradeTableToolbar } from '@/components/trades/trade-table-toolbar';
 
 interface TradeTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function TradeTable<TData, TValue>({
+export function OrderTable<TData, TValue>({
   columns,
   data,
 }: TradeTableProps<TData, TValue>) {
@@ -65,17 +58,14 @@ export function TradeTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    getRowCanExpand: () => true,
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
   return (
-    <div className="flex h-full flex-col space-y-4">
-      <TradeTableToolbar table={table} />
-      <div className="flex-1 overflow-auto rounded-md border">
+    <div className="flex h-full flex-col space-y-4 px-4">
+      <div className="flex-1 overflow-auto rounded-md">
         <Table>
-          <TableHeader>
+          <TableHeader className="border-b">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -96,32 +86,19 @@ export function TradeTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <Fragment key={row.id}>
-                  <TableRow
-                    data-state={row.getIsSelected() && 'selected'}
-                    className={cn(row.getIsExpanded() && 'border-0')}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-
-                  {row.getIsExpanded() && (
-                    <TableRow className="hover:bg-background">
-                      <TableCell colSpan={row.getVisibleCells().length}>
-                        <OrderTable
-                          data={(row.original as ComputedTrade).orders}
-                          columns={orderTableColumns}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </Fragment>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
               ))
             ) : (
               <TableRow>
@@ -129,14 +106,13 @@ export function TradeTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No trades.
+                  No orders.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
     </div>
   );
 }
