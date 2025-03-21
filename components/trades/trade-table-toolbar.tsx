@@ -15,8 +15,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { ConfirmationDialog } from '@/components/confirmation-dialog';
+import { DataTableColumnOptions } from '@/components/data-table/data-table-column-options';
 import { DataTableFacetedFilter } from '@/components/data-table/data-table-faceted-filter';
-import { DataTableViewOptions } from '@/components/data-table/data-table-view-options';
 import { useStore } from '@/components/layout/app-store-provider';
 
 interface DataTableToolbarProps<TData> {
@@ -109,7 +109,7 @@ export function TradeTableToolbar<TData extends ComputedTrade>({
           </Button>
         )}
       </div>
-      <DataTableViewOptions table={table} />
+      <DataTableColumnOptions table={table} />
 
       <ConfirmationDialog
         isOpen={isConfirmationDialogOpen}

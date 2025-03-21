@@ -2,7 +2,7 @@
 
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 import { Table } from '@tanstack/react-table';
-import { Settings2 } from 'lucide-react';
+import { ChevronDown, Columns2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,13 +13,13 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
-interface DataTableViewOptionsProps<TData> {
+interface DataTableColumnOptions<TData> {
   table: Table<TData>;
 }
 
-export function DataTableViewOptions<TData>({
+export function DataTableColumnOptions<TData>({
   table,
-}: DataTableViewOptionsProps<TData>) {
+}: DataTableColumnOptions<TData>) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -28,13 +28,13 @@ export function DataTableViewOptions<TData>({
           size="sm"
           className="ml-auto hidden h-8 lg:flex"
         >
-          <Settings2 />
-          View
+          <Columns2 />
+          <span className="hidden lg:inline">Customize Columns</span>
+          <span className="lg:hidden">Columns</span>
+          <ChevronDown />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[150px]">
-        <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
-        <DropdownMenuSeparator />
         {table
           .getAllColumns()
           .filter(
