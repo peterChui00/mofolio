@@ -59,6 +59,7 @@ export const tradeTableColumns: ColumnDef<ComputedTrade>[] = [
   {
     id: 'expander',
     cell: ({ row }) => {
+      const isExpanded = row.getIsExpanded();
       return (
         row.getCanExpand() && (
           <Button
@@ -66,7 +67,10 @@ export const tradeTableColumns: ColumnDef<ComputedTrade>[] = [
             size="icon"
             onClick={row.getToggleExpandedHandler()}
           >
-            {row.getIsExpanded() ? <ChevronDown /> : <ChevronRight />}
+            <span className="sr-only">
+              {(isExpanded ? 'Collapse' : 'Expand') + " trade's orders"}
+            </span>
+            {isExpanded ? <ChevronDown /> : <ChevronRight />}
           </Button>
         )
       );
@@ -91,7 +95,7 @@ export const tradeTableColumns: ColumnDef<ComputedTrade>[] = [
       <DataTableColumnHeader column={column} title="Side" />
     ),
     cell: ({ row }) => {
-      return <Badge>{row.original.side}</Badge>;
+      return row.original.side && <Badge>{row.original.side}</Badge>;
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));

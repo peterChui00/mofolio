@@ -11,7 +11,9 @@ export interface UserState {
 export type UserActions = {
   resetUserState(): void;
   setTrades: (trades: Trade[]) => void;
+  deleteTrade: (tradeId: string | string[]) => void;
   addOrder: (order: Order, tradeId?: string) => void;
+  deleteOrder: (orderId: string | string[]) => void;
 };
 
 export type UserSlice = UserState & UserActions;
@@ -28,6 +30,13 @@ export const createUserSlice: StateCreator<Store, [], [], UserSlice> = (
   resetUserState: () => set(initialUserState),
 
   setTrades: (trades: Trade[]) => set({ trades }),
+
+  deleteTrade: (tradeId: string | string[]) => {
+    const idsToDelete = Array.isArray(tradeId) ? tradeId : [tradeId];
+    set((state) => ({
+      trades: state.trades.filter((trade) => !idsToDelete.includes(trade.id)),
+    }));
+  },
 
   addOrder: (order: Order, tradeId?: string) => {
     const trades = get().trades;
@@ -59,6 +68,16 @@ export const createUserSlice: StateCreator<Store, [], [], UserSlice> = (
           orders: [order],
         },
       ],
+    }));
+  },
+
+  deleteOrder: (orderId: string | string[]) => {
+    const idsToDelete = Array.isArray(orderId) ? orderId : [orderId];
+    set((state) => ({
+      trades: state.trades.map((trade) => ({
+        ...trade,
+        orders: trade.orders.filter((order) => !idsToDelete.includes(order.id)),
+      })),
     }));
   },
 });

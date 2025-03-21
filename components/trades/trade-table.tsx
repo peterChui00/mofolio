@@ -13,7 +13,9 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  RowSelectionState,
   SortingState,
+  Updater,
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table';
@@ -37,14 +39,37 @@ interface TradeTableProps<TData, TValue> {
   data: TData[];
 }
 
-export function TradeTable<TData, TValue>({
+export function TradeTable<TData extends ComputedTrade, TValue>({
   columns,
   data,
 }: TradeTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState({});
+  const [orderRowSelection, setOrderRowSelection] = useState<RowSelectionState>(
+    {}
+  );
+  const [orderRowSelectionId, setOrderRowSelectionId] = useState<
+    string | undefined
+  >(undefined);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  const onRowSelectionChange = (updater: Updater<RowSelectionState>) => {
+    const newState =
+      typeof updater === 'function' ? updater(rowSelection) : updater;
+    setRowSelection(newState);
+    setOrderRowSelection({});
+    setOrderRowSelectionId(undefined);
+  };
+
+  const onOrderRowSelectionChange = (
+    value: RowSelectionState,
+    tradeId?: string
+  ) => {
+    setOrderRowSelection(value);
+    setOrderRowSelectionId(tradeId);
+    setRowSelection({});
+  };
 
   const table = useReactTable({
     data,
@@ -56,10 +81,11 @@ export function TradeTable<TData, TValue>({
       columnFilters,
     },
     enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    getRowId: (originalRow) => originalRow.id,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -72,7 +98,11 @@ export function TradeTable<TData, TValue>({
 
   return (
     <div className="flex h-full flex-col space-y-4">
-      <TradeTableToolbar table={table} />
+      <TradeTableToolbar
+        table={table}
+        orderRowSelection={orderRowSelection}
+        orderRowSelectionId={orderRowSelectionId}
+      />
       <div className="flex-1 overflow-auto rounded-md border">
         <Table>
           <TableHeader>
@@ -115,8 +145,11 @@ export function TradeTable<TData, TValue>({
                     <TableRow className="hover:bg-background">
                       <TableCell colSpan={row.getVisibleCells().length}>
                         <OrderTable
-                          data={(row.original as ComputedTrade).orders}
+                          tradeId={row.original.id}
+                          data={row.original.orders}
                           columns={orderTableColumns}
+                          rowSelectionId={orderRowSelectionId}
+                          onRowSelectionChange={onOrderRowSelectionChange}
                         />
                       </TableCell>
                     </TableRow>
