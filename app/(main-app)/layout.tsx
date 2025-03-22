@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import { cookies } from 'next/headers';
 import { Trade } from '@/types';
 
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import DemoDataProvider from '@/components/layout/demo-data-provider';
 
@@ -22,9 +22,11 @@ export default async function MainAppLayout({
   const demoData: Trade[] = JSON.parse(demoDataJsonfile);
 
   return (
-    <SidebarProvider defaultOpen={defaultOpen}>
-      <AppSidebar />
-      <main className="flex h-dvh w-full flex-1 flex-col">{children}</main>
+    <SidebarProvider defaultOpen={defaultOpen} className="h-svh">
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <main className="flex size-full flex-1 flex-col">{children}</main>
+      </SidebarInset>
       <DemoDataProvider data={demoData} />
     </SidebarProvider>
   );
