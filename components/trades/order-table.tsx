@@ -36,7 +36,7 @@ interface TradeTableProps<TData, TValue> {
   onRowSelectionChange?: (
     selection: RowSelectionState,
     tradeId?: string
-  ) => any;
+  ) => void;
 }
 
 export function OrderTable<TData extends Order, TValue>({
@@ -55,8 +55,10 @@ export function OrderTable<TData extends Order, TValue>({
     const newState =
       typeof updater === 'function' ? updater(rowSelection) : updater;
     setRowSelection(newState);
-    typeof onRowSelectionChange === 'function' &&
+
+    if (typeof onRowSelectionChange === 'function') {
       onRowSelectionChange(newState, tradeId);
+    }
   };
 
   const table = useReactTable({
@@ -84,7 +86,9 @@ export function OrderTable<TData extends Order, TValue>({
 
   useEffect(() => {
     // Reset row selection when selecting other trade
-    rowSelectionId !== tradeId && setRowSelection({});
+    if (rowSelectionId !== tradeId) {
+      setRowSelection({});
+    }
   }, [tradeId, rowSelectionId]);
 
   return (

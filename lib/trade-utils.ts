@@ -32,7 +32,6 @@ export const computeTradeData = (trade: Trade): ComputedTrade => {
   let position = 0;
   let realizedPnl = 0;
   let fee = 0;
-  let lastSide: ComputedTrade['side'] = null;
   let avgPrice: ComputedTrade['avgPrice'] = null;
   let finalSide: ComputedTrade['side'] = null;
   let finalAvgPrice: ComputedTrade['avgPrice'] = null;
@@ -65,7 +64,6 @@ export const computeTradeData = (trade: Trade): ComputedTrade => {
           const remainingQuantity = order.quantity - amountToClose;
           position = remainingQuantity;
           avgPrice = order.price;
-          lastSide = 'LONG';
         }
       } else {
         // Adding to a long position or starting a new long position
@@ -79,9 +77,6 @@ export const computeTradeData = (trade: Trade): ComputedTrade => {
           avgPrice = order.price;
         }
         position = newPosition;
-        if (position > 0) {
-          lastSide = 'LONG';
-        }
       }
     }
     // Process SELL order
@@ -97,7 +92,6 @@ export const computeTradeData = (trade: Trade): ComputedTrade => {
           const remainingQuantity = order.quantity - amountToClose;
           position = -remainingQuantity;
           avgPrice = order.price;
-          lastSide = 'SHORT';
         }
       } else {
         // Adding to a short position or starting a new short position
@@ -112,9 +106,6 @@ export const computeTradeData = (trade: Trade): ComputedTrade => {
           avgPrice = order.price;
         }
         position = newPosition;
-        if (position < 0) {
-          lastSide = 'SHORT';
-        }
       }
     }
   }

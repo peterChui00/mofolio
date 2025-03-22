@@ -43,11 +43,10 @@ export function TradeTableToolbar<TData extends ComputedTrade>({
     table.getRowModel().rows.find((row) => row.id === orderRowSelectionId);
   const selectionLabel = (isOrderRowSelection ? 'order' : 'trade') + '(s)';
 
-  const handleDeleteTradeOrOrder = () => {
+  const handleDeleteTradeOrOrder = () =>
     isOrderRowSelection
       ? deleteOrder(orderRowSelectionArr)
       : deleteTrade(filteredRowSelection.map((row) => row.original.id));
-  };
 
   const toggleConfirmationDialog = () =>
     setIsConfirmationDialogOpen(!isConfirmationDialogOpen);

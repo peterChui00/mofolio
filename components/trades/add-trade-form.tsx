@@ -100,7 +100,7 @@ export default function AddTradeFrom() {
                     type="single"
                     variant="outline"
                     onValueChange={(value) => {
-                      value && field.onChange(value);
+                      if (value) field.onChange(value);
                     }}
                     value={field.value}
                   >
