@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
+import { nanoid } from 'nanoid';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -74,7 +75,7 @@ export default function AddTradeFrom() {
       ...data,
       timestamp: data.timestamp.toISOString(),
       status: 'FILLED',
-      id: crypto.randomUUID(),
+      id: nanoid(),
       note: '',
       tags: [],
     });
