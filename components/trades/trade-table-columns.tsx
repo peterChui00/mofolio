@@ -49,6 +49,7 @@ export const tradeTableColumns: ColumnDef<ComputedTrade>[] = [
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
+        onClick={(e) => e.stopPropagation()}
         aria-label="Select row"
         className="translate-y-[2px]"
       />
@@ -65,7 +66,10 @@ export const tradeTableColumns: ColumnDef<ComputedTrade>[] = [
           <Button
             variant="ghost"
             size="icon"
-            onClick={row.getToggleExpandedHandler()}
+            onClick={(e) => {
+              e.stopPropagation();
+              row.toggleExpanded();
+            }}
           >
             <span className="sr-only">
               {(isExpanded ? 'Collapse' : 'Expand') + " trade's orders"}

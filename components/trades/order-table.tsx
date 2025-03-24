@@ -19,6 +19,7 @@ import {
   VisibilityState,
 } from '@tanstack/react-table';
 
+import { cn } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -37,6 +38,7 @@ interface TradeTableProps<TData, TValue> {
     selection: RowSelectionState,
     tradeId?: string
   ) => void;
+  className?: string;
 }
 
 export function OrderTable<TData extends Order, TValue>({
@@ -45,6 +47,7 @@ export function OrderTable<TData extends Order, TValue>({
   tradeId,
   rowSelectionId,
   onRowSelectionChange,
+  className,
 }: TradeTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -92,7 +95,7 @@ export function OrderTable<TData extends Order, TValue>({
   }, [tradeId, rowSelectionId]);
 
   return (
-    <div className="flex h-full flex-col space-y-4 px-4">
+    <div className={cn('flex h-full flex-col space-y-4', className)}>
       <div className="flex-1 overflow-auto rounded-md">
         <Table>
           <TableHeader className="border-b">

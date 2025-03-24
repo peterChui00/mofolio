@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ComputedTrade } from '@/types';
 import {
   ColumnDef,
@@ -13,6 +14,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Row,
   RowSelectionState,
   SortingState,
   Updater,
@@ -53,6 +55,7 @@ export function TradeTable<TData extends ComputedTrade, TValue>({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const router = useRouter();
 
   const onRowSelectionChange = (updater: Updater<RowSelectionState>) => {
     const newState =
@@ -96,6 +99,10 @@ export function TradeTable<TData extends ComputedTrade, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
+  const handleRowClick = (row: Row<TData>) => {
+    router.push(`/trades/${row.original.id}`);
+  };
+
   return (
     <div className="flex h-full flex-col space-y-4">
       <TradeTableToolbar
@@ -130,6 +137,7 @@ export function TradeTable<TData extends ComputedTrade, TValue>({
                   <TableRow
                     data-state={row.getIsSelected() && 'selected'}
                     className={cn(row.getIsExpanded() && 'border-0')}
+                    onClick={() => handleRowClick(row)}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
@@ -150,6 +158,7 @@ export function TradeTable<TData extends ComputedTrade, TValue>({
                           columns={orderTableColumns}
                           rowSelectionId={orderRowSelectionId}
                           onRowSelectionChange={onOrderRowSelectionChange}
+                          className="px-4"
                         />
                       </TableCell>
                     </TableRow>
