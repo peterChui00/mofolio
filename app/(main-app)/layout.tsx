@@ -5,6 +5,7 @@ import { Trade } from '@/types';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import DemoDataProvider from '@/components/layout/demo-data-provider';
+import DialogProvider from '@/components/layout/dialog-provider';
 
 export default async function MainAppLayout({
   children,
@@ -28,6 +29,7 @@ export default async function MainAppLayout({
         <main className="flex size-full flex-1 flex-col">{children}</main>
       </SidebarInset>
       <DemoDataProvider data={demoData} />
+      <DialogProvider />
     </SidebarProvider>
   );
 }

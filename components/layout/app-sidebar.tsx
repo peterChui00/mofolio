@@ -22,7 +22,6 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { useStore } from '@/components/layout/app-store-provider';
-import AddTradeDialog from '@/components/trades/add-trade-dialog';
 
 // Menu items
 const items = [
@@ -44,12 +43,16 @@ const items = [
 ];
 
 export function AppSidebar({ ...props }) {
-  const isAddTradeDialogOpen = useStore((state) => state.isAddTradeDialogOpen);
   const toggleAddTradeDialog = useStore((state) => state.toggleAddTradeDialog);
+  const setAddTradeDialogState = useStore(
+    (state) => state.setAddTradeDialogState
+  );
   const pathname = usePathname();
 
-  const onAddTradeDialogOpenChange = (open: boolean) =>
-    toggleAddTradeDialog(open);
+  const onAddTradeButtonClick = () => {
+    setAddTradeDialogState({ title: 'Add trade' });
+    toggleAddTradeDialog(true);
+  };
 
   return (
     <>
@@ -85,7 +88,7 @@ export function AppSidebar({ ...props }) {
               <SidebarMenuButton
                 asChild
                 tooltip={'Add Trade'}
-                onClick={() => toggleAddTradeDialog()}
+                onClick={onAddTradeButtonClick}
               >
                 <button>
                   <SquarePlus />
@@ -96,11 +99,6 @@ export function AppSidebar({ ...props }) {
           </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
-
-      <AddTradeDialog
-        open={isAddTradeDialogOpen}
-        onOpenChange={onAddTradeDialogOpenChange}
-      />
     </>
   );
 }
