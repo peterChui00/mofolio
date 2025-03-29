@@ -4,17 +4,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import AddTradeFrom, {
-  AddTradeFromProps,
-} from '@/components/trades/add-trade-form';
+import EditTradeFrom, {
+  EditTradeFromProps,
+} from '@/components/trades/edit-trade-form';
 
-export default function AddTradeDialog({
+export default function EditTradeDialog({
   title,
   formProps,
   ...props
 }: {
   title?: string;
-  formProps?: AddTradeFromProps;
+  formProps?: EditTradeFromProps;
 } & React.ComponentProps<typeof Dialog>) {
   return (
     <Dialog {...props}>
@@ -22,7 +22,7 @@ export default function AddTradeDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <AddTradeFrom {...formProps} />
+        <EditTradeFrom {...formProps} />
       </DialogContent>
     </Dialog>
   );

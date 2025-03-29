@@ -12,9 +12,11 @@ import { orderTableColumns } from '@/components/trades/order-table-columns';
 
 export default function TradeDetail({ id }: { id: string }) {
   const trade = useStore((state) => getTradeById(state.trades, id));
-  const toggleAddTradeDialog = useStore((state) => state.toggleAddTradeDialog);
-  const setAddTradeDialogState = useStore(
-    (state) => state.setAddTradeDialogState
+  const toggleEditTradeDialog = useStore(
+    (state) => state.toggleEditTradeDialog
+  );
+  const setEditTradeDialogState = useStore(
+    (state) => state.setEditTradeDialogState
   );
 
   if (!trade) return <div>Trade not found</div>;
@@ -31,7 +33,7 @@ export default function TradeDetail({ id }: { id: string }) {
     title: string,
     status: 'STOP_LOSS' | 'TAKE_PROFIT'
   ) => {
-    setAddTradeDialogState({
+    setEditTradeDialogState({
       title,
       formProps: {
         defaultValues: {
@@ -60,7 +62,7 @@ export default function TradeDetail({ id }: { id: string }) {
         },
       },
     });
-    toggleAddTradeDialog(true);
+    toggleEditTradeDialog(true);
   };
 
   return (

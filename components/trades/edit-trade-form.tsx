@@ -60,7 +60,7 @@ const FormSchema = z.object({
 
 export type TradeForm = z.infer<typeof FormSchema>;
 
-export type AddTradeFromProps = {
+export type EditTradeFromProps = {
   defaultValues?: UseFormProps<TradeForm>['defaultValues'];
   fieldOptions?: Partial<
     Record<keyof TradeForm, { disabled?: boolean; visible?: boolean }>
@@ -68,13 +68,15 @@ export type AddTradeFromProps = {
   onSubmit?: (data: TradeForm) => void;
 };
 
-export default function AddTradeFrom({
+export default function EditTradeFrom({
   defaultValues,
   fieldOptions,
   onSubmit,
-}: AddTradeFromProps) {
+}: EditTradeFromProps) {
   const addOrder = useStore((state) => state.addOrder);
-  const toggleAddTradeDialog = useStore((state) => state.toggleAddTradeDialog);
+  const toggleEditTradeDialog = useStore(
+    (state) => state.toggleEditTradeDialog
+  );
 
   const form = useForm<TradeForm>({
     resolver: zodResolver(FormSchema),
@@ -105,7 +107,7 @@ export default function AddTradeFrom({
       note: '',
       tags: [],
     });
-    toggleAddTradeDialog(false);
+    toggleEditTradeDialog(false);
   };
 
   return (

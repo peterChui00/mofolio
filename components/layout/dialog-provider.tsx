@@ -1,23 +1,27 @@
 'use client';
 
 import { useStore } from '@/components/layout/app-store-provider';
-import AddTradeDialog from '@/components/trades/add-trade-dialog';
+import EditTradeDialog from '@/components/trades/edit-trade-dialog';
 
 export default function DialogProvider() {
-  const isAddTradeDialogOpen = useStore((state) => state.isAddTradeDialogOpen);
-  const toggleAddTradeDialog = useStore((state) => state.toggleAddTradeDialog);
-  const addTradeDialogState = useStore((state) => state.addTradeDialogState);
+  const isEditTradeDialogOpen = useStore(
+    (state) => state.isEditTradeDialogOpen
+  );
+  const toggleEditTradeDialog = useStore(
+    (state) => state.toggleEditTradeDialog
+  );
+  const editTradeDialogState = useStore((state) => state.editTradeDialogState);
 
-  const onAddTradeDialogOpenChange = (open: boolean) =>
-    toggleAddTradeDialog(open);
+  const onEditTradeDialogOpenChange = (open: boolean) =>
+    toggleEditTradeDialog(open);
 
   return (
     <>
-      <AddTradeDialog
-        open={isAddTradeDialogOpen}
-        onOpenChange={onAddTradeDialogOpenChange}
-        title={addTradeDialogState.title}
-        formProps={addTradeDialogState.formProps}
+      <EditTradeDialog
+        open={isEditTradeDialogOpen}
+        onOpenChange={onEditTradeDialogOpenChange}
+        title={editTradeDialogState.title}
+        formProps={editTradeDialogState.formProps}
       />
     </>
   );

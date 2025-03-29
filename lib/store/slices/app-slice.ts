@@ -1,24 +1,24 @@
 import { StateCreator } from 'zustand';
 
 import { Store } from '@/lib/store';
-import { AddTradeFromProps } from '@/components/trades/add-trade-form';
+import { EditTradeFromProps } from '@/components/trades/edit-trade-form';
 
 export interface AppState {
   isLoading: boolean;
-  isAddTradeDialogOpen: boolean;
-  addTradeDialogState: {
+  isEditTradeDialogOpen: boolean;
+  editTradeDialogState: {
     title: string;
-    formProps?: AddTradeFromProps;
+    formProps?: EditTradeFromProps;
   };
 }
 
 export type AppActions = {
   setIsLoading(isLoading: AppState['isLoading']): void;
-  toggleAddTradeDialog(
-    isAddTradeDialogOpen?: AppState['isAddTradeDialogOpen']
+  toggleEditTradeDialog(
+    isEditTradeDialogOpen?: AppState['isEditTradeDialogOpen']
   ): void;
-  setAddTradeDialogState(
-    addTradeDialogState: AppState['addTradeDialogState']
+  setEditTradeDialogState(
+    editTradeDialogState: AppState['editTradeDialogState']
   ): void;
   resetAppState(): void;
 };
@@ -27,8 +27,8 @@ export type AppSlice = AppState & AppActions;
 
 export const initialAppState: AppState = {
   isLoading: false,
-  isAddTradeDialogOpen: false,
-  addTradeDialogState: {
+  isEditTradeDialogOpen: false,
+  editTradeDialogState: {
     title: 'Add Trade',
   },
 };
@@ -36,13 +36,14 @@ export const initialAppState: AppState = {
 export const createAppSlice: StateCreator<Store, [], [], AppSlice> = (set) => ({
   ...initialAppState,
   setIsLoading: (isLoading) => set({ isLoading }),
-  toggleAddTradeDialog: (isAddTradeDialogOpen) =>
+  toggleEditTradeDialog: (isEditTradeDialogOpen) =>
     set((state) => ({
-      isAddTradeDialogOpen:
-        typeof isAddTradeDialogOpen === 'boolean'
-          ? isAddTradeDialogOpen
-          : !state.isAddTradeDialogOpen,
+      isEditTradeDialogOpen:
+        typeof isEditTradeDialogOpen === 'boolean'
+          ? isEditTradeDialogOpen
+          : !state.isEditTradeDialogOpen,
     })),
-  setAddTradeDialogState: (addTradeDialogState) => set({ addTradeDialogState }),
+  setEditTradeDialogState: (editTradeDialogState) =>
+    set({ editTradeDialogState }),
   resetAppState: () => set(initialAppState),
 });

@@ -43,15 +43,17 @@ const items = [
 ];
 
 export function AppSidebar({ ...props }) {
-  const toggleAddTradeDialog = useStore((state) => state.toggleAddTradeDialog);
-  const setAddTradeDialogState = useStore(
-    (state) => state.setAddTradeDialogState
+  const toggleEditTradeDialog = useStore(
+    (state) => state.toggleEditTradeDialog
+  );
+  const setEditTradeDialogState = useStore(
+    (state) => state.setEditTradeDialogState
   );
   const pathname = usePathname();
 
-  const onAddTradeButtonClick = () => {
-    setAddTradeDialogState({ title: 'Add trade' });
-    toggleAddTradeDialog(true);
+  const onEditTradeButtonClick = () => {
+    setEditTradeDialogState({ title: 'Add trade' });
+    toggleEditTradeDialog(true);
   };
 
   return (
@@ -88,7 +90,7 @@ export function AppSidebar({ ...props }) {
               <SidebarMenuButton
                 asChild
                 tooltip={'Add Trade'}
-                onClick={onAddTradeButtonClick}
+                onClick={onEditTradeButtonClick}
               >
                 <button>
                   <SquarePlus />
