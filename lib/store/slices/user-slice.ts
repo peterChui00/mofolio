@@ -1,15 +1,18 @@
 import { Order, Trade } from '@/types';
+import { User } from '@supabase/supabase-js';
 import { StateCreator } from 'zustand';
 
 import { Store } from '@/lib/store';
 import { getOpenTradeBySymbol, getTradeById } from '@/lib/trade-utils';
 
 export interface UserState {
+  user: User | null;
   trades: Trade[];
 }
 
 export type UserActions = {
   resetUserState(): void;
+  setUser: (user: UserState['user']) => void;
   setTrades: (trades: Trade[]) => void;
   deleteTrade: (tradeId: string | string[]) => void;
   addOrder: (order: Order, tradeId?: string) => void;
@@ -19,6 +22,7 @@ export type UserActions = {
 export type UserSlice = UserState & UserActions;
 
 export const initialUserState: UserState = {
+  user: null,
   trades: [],
 };
 
@@ -28,6 +32,8 @@ export const createUserSlice: StateCreator<Store, [], [], UserSlice> = (
 ) => ({
   ...initialUserState,
   resetUserState: () => set(initialUserState),
+
+  setUser: (user) => set({ user }),
 
   setTrades: (trades: Trade[]) => set({ trades }),
 

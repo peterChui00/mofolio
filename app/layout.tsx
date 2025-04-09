@@ -5,6 +5,7 @@ import './globals.css';
 
 import { AppStoreProvider } from '@/components/layout/app-store-provider';
 import { ThemeProvider } from '@/components/layout/theme-provider';
+import UserAuthProvider from '@/components/layout/user-auth-provider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -41,7 +42,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AppStoreProvider>{children}</AppStoreProvider>
+          <AppStoreProvider>
+            {children}
+            <UserAuthProvider />
+          </AppStoreProvider>
         </ThemeProvider>
       </body>
     </html>

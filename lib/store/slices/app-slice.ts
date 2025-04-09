@@ -5,6 +5,7 @@ import { EditTradeFromProps } from '@/components/trades/edit-trade-form';
 
 export interface AppState {
   isLoading: boolean;
+  isAuthLoading: boolean;
   isEditTradeDialogOpen: boolean;
   editTradeDialogState: {
     title: string;
@@ -14,6 +15,7 @@ export interface AppState {
 
 export type AppActions = {
   setIsLoading(isLoading: AppState['isLoading']): void;
+  setIsAuthLoading(isAuthLoading: AppState['isAuthLoading']): void;
   toggleEditTradeDialog(
     isEditTradeDialogOpen?: AppState['isEditTradeDialogOpen']
   ): void;
@@ -27,6 +29,7 @@ export type AppSlice = AppState & AppActions;
 
 export const initialAppState: AppState = {
   isLoading: false,
+  isAuthLoading: true,
   isEditTradeDialogOpen: false,
   editTradeDialogState: {
     title: 'Add Trade',
@@ -35,7 +38,11 @@ export const initialAppState: AppState = {
 
 export const createAppSlice: StateCreator<Store, [], [], AppSlice> = (set) => ({
   ...initialAppState,
+
   setIsLoading: (isLoading) => set({ isLoading }),
+
+  setIsAuthLoading: (isAuthLoading) => set({ isAuthLoading }),
+
   toggleEditTradeDialog: (isEditTradeDialogOpen) =>
     set((state) => ({
       isEditTradeDialogOpen:
@@ -43,7 +50,9 @@ export const createAppSlice: StateCreator<Store, [], [], AppSlice> = (set) => ({
           ? isEditTradeDialogOpen
           : !state.isEditTradeDialogOpen,
     })),
+
   setEditTradeDialogState: (editTradeDialogState) =>
     set({ editTradeDialogState }),
+
   resetAppState: () => set(initialAppState),
 });
