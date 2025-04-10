@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 
 import { computeTradeData } from '@/lib/trade-utils';
-import { useStore } from '@/components/layout/app-store-provider';
+import { useStore } from '@/components/providers/app-store-provider';
 import { TradeTable } from '@/components/trades/trade-table';
 import {
   statusCompareFn,

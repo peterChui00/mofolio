@@ -6,7 +6,7 @@ import { computeTradeData, getTradeById } from '@/lib/trade-utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useStore } from '@/components/layout/app-store-provider';
+import { useStore } from '@/components/providers/app-store-provider';
 import { OrderTable } from '@/components/trades/order-table';
 import { orderTableColumns } from '@/components/trades/order-table-columns';
 

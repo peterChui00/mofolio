@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 
 import { createClient } from '@/lib/supabase/client';
-import { useStore } from '@/components/layout/app-store-provider';
+import { useStore } from '@/components/providers/app-store-provider';
 
 export default function UserAuthProvider() {
   const setUser = useStore((state) => state.setUser);

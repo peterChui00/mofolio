@@ -1,6 +1,6 @@
 'use client';
 
-import { useStore } from '@/components/layout/app-store-provider';
+import { useStore } from '@/components/providers/app-store-provider';
 import EditTradeDialog from '@/components/trades/edit-trade-dialog';
 
 export default function DialogProvider() {

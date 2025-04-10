@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { ConfirmationDialog } from '@/components/confirmation-dialog';
 import { DataTableColumnOptions } from '@/components/data-table/data-table-column-options';
 import { DataTableFacetedFilter } from '@/components/data-table/data-table-faceted-filter';
-import { useStore } from '@/components/layout/app-store-provider';
+import { useStore } from '@/components/providers/app-store-provider';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;

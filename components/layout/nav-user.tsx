@@ -26,8 +26,8 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useStore } from '@/components/layout/app-store-provider';
 import UserAvatar from '@/components/layout/user-avatar';
+import { useStore } from '@/components/providers/app-store-provider';
 
 export function NavUser() {
   const { isMobile } = useSidebar();

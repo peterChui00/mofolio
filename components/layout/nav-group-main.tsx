@@ -10,8 +10,8 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { NavMenuItem } from '@/components/layout/app-sidebar';
-import { useStore } from '@/components/layout/app-store-provider';
 import NavMenu from '@/components/layout/nav-menu';
+import { useStore } from '@/components/providers/app-store-provider';
 
 export function NavGroupMain({
   items,
