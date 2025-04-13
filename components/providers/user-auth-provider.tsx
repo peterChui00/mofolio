@@ -14,9 +14,9 @@ export default function UserAuthProvider() {
     const supabase = createClient();
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (['INITIAL_SESSION', 'SIGNED_IN'].includes(event) && session?.user) {
-          const curUserId = session.user?.id;
-          if (curUserId !== lastUserId.current) {
+        if (['INITIAL_SESSION', 'SIGNED_IN'].includes(event)) {
+          const curUserId = session?.user?.id;
+          if (curUserId && curUserId !== lastUserId.current) {
             setUser(session.user);
             lastUserId.current = curUserId;
           }
