@@ -1,3 +1,9 @@
+import { SupabaseClient } from '@supabase/supabase-js';
+
+import { Database } from '@/types/supabase';
+
+export type TypeSupabaseClient = SupabaseClient<Database>;
+
 export type Order = {
   id: string;
   timestamp: string;

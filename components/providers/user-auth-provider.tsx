@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 
 import { createClient } from '@/lib/supabase/client';
 import { useStore } from '@/components/providers/app-store-provider';
+import { getQueryClient } from '@/components/providers/query-provider';
 
 export default function UserAuthProvider() {
   const setUser = useStore((state) => state.setUser);
@@ -23,6 +24,7 @@ export default function UserAuthProvider() {
           setIsAuthLoading(false);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
+          getQueryClient().clear();
         }
       }
     );

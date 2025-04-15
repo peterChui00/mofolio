@@ -6,6 +6,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import DemoDataProvider from '@/components/providers/demo-data-provider';
 import DialogProvider from '@/components/providers/dialog-provider';
+import PortfolioProvider from '@/components/providers/portfolio-provider';
 
 export default async function MainAppLayout({
   children,
@@ -23,13 +24,15 @@ export default async function MainAppLayout({
   const demoData: Trade[] = JSON.parse(demoDataJsonfile);
 
   return (
-    <SidebarProvider defaultOpen={defaultOpen} className="h-svh">
-      <AppSidebar variant="inset" />
-      <SidebarInset>
-        <main className="flex size-full flex-1 flex-col">{children}</main>
-      </SidebarInset>
-      <DemoDataProvider data={demoData} />
-      <DialogProvider />
-    </SidebarProvider>
+    <PortfolioProvider>
+      <SidebarProvider defaultOpen={defaultOpen} className="h-svh">
+        <AppSidebar variant="inset" />
+        <SidebarInset>
+          <main className="flex size-full flex-1 flex-col">{children}</main>
+        </SidebarInset>
+        <DemoDataProvider data={demoData} />
+        <DialogProvider />
+      </SidebarProvider>
+    </PortfolioProvider>
   );
 }

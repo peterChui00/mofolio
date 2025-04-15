@@ -11,9 +11,11 @@ export interface AppState {
     title: string;
     formProps?: EditTradeFromProps;
   };
+  activePortfolioId?: string;
 }
 
 export type AppActions = {
+  resetAppState(): void;
   setIsLoading(isLoading: AppState['isLoading']): void;
   setIsAuthLoading(isAuthLoading: AppState['isAuthLoading']): void;
   toggleEditTradeDialog(
@@ -22,7 +24,7 @@ export type AppActions = {
   setEditTradeDialogState(
     editTradeDialogState: AppState['editTradeDialogState']
   ): void;
-  resetAppState(): void;
+  setActivePortfolioId(activePortfolioId: AppState['activePortfolioId']): void;
 };
 
 export type AppSlice = AppState & AppActions;
@@ -34,10 +36,13 @@ export const initialAppState: AppState = {
   editTradeDialogState: {
     title: 'Add Trade',
   },
+  activePortfolioId: undefined,
 };
 
 export const createAppSlice: StateCreator<Store, [], [], AppSlice> = (set) => ({
   ...initialAppState,
+
+  resetAppState: () => set(initialAppState),
 
   setIsLoading: (isLoading) => set({ isLoading }),
 
@@ -54,5 +59,5 @@ export const createAppSlice: StateCreator<Store, [], [], AppSlice> = (set) => ({
   setEditTradeDialogState: (editTradeDialogState) =>
     set({ editTradeDialogState }),
 
-  resetAppState: () => set(initialAppState),
+  setActivePortfolioId: (activePortfolioId) => set({ activePortfolioId }),
 });
