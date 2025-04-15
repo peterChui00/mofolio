@@ -45,10 +45,12 @@ Mofolio is a trading journal tool built with Next.js that helps traders visually
 
 ### Built With
 
+[![Typescript][Typescript]][Typescript-url]
 [![React][React.js]][React-url]
 [![Next][Next.js]][Next-url]
 [![Shadcn/ui][shadcn/ui]][shadcn/ui-url]
 [![tailwindcss][tailwindcss]][tailwindcss-url]
+[![Supabase][Supabase]][Supabase-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -60,12 +62,13 @@ Mofolio is a trading journal tool built with Next.js that helps traders visually
    ```sh
    git clone https://github.com/peterChui00/Mofolio.git
    ```
-2. Install NPM packages and run the dev server
+2. Run `nanoid.sql` and `migration.sql` (from db folder) in Supabase
+3. Install NPM packages and run the dev server
    ```sh
    pnpm i
    pnpm dev
    ```
-3. Open [http://localhost:3000](http://localhost:3000) with your browser
+4. Open [http://localhost:3000](http://localhost:3000) with your browser
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -95,5 +98,9 @@ Peter Chui
 [React-url]: https://reactjs.org/
 [shadcn/ui]: https://img.shields.io/badge/Shadcn%2Fui-000000?style=for-the-badge&logo=shadcnui&logoColor=white
 [shadcn/ui-url]: https://ui.shadcn.com/
-[tailwindcss]: https://img.shields.io/badge/Tailwind%20CSS-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white
+[tailwindcss]: https://img.shields.io/badge/Tailwind%20CSS-0F172A?style=for-the-badge&logo=tailwind-css
 [tailwindcss-url]: https://tailwindcss.com/
+[Typescript]: https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white
+[Typescript-url]: https://www.typescriptlang.org/
+[Supabase]: https://shields.io/badge/supabase-121212?logo=supabase&style=for-the-badge
+[Supabase-url]: https://supabase.com/
