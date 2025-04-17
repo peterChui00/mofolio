@@ -16,7 +16,7 @@ export default function LandingHeader() {
   return (
     <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
       <div className="container flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/product" className="flex items-center gap-2">
           <Icons.logo className="text-primary size-6" />
           <span className="text-xl font-bold">Mofolio</span>
         </Link>

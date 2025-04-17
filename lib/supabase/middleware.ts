@@ -42,6 +42,16 @@ export const updateSession = async (request: NextRequest) => {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Allow all users to access landing page via /product path
+  if (request.nextUrl.pathname === '/product') {
+    return NextResponse.rewrite(new URL('/', request.url));
+  }
+
+  // Redirect authenticated users attempting to access the landing page to the dashboard page
+  if (user && request.nextUrl.pathname === '/') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
   // Redirect authenticated users attempting to access the login page to the dashboard page
   if (user && request.nextUrl.pathname.startsWith('/login')) {
     const url = request.nextUrl.clone();
