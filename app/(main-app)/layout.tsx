@@ -4,6 +4,7 @@ import { Trade } from '@/types';
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/app-sidebar';
+import ActivePortfolioIdProvider from '@/components/providers/active-portfolio-id-provider';
 import DemoDataProvider from '@/components/providers/demo-data-provider';
 import DialogProvider from '@/components/providers/dialog-provider';
 import PortfolioProvider from '@/components/providers/portfolio-provider';
@@ -25,6 +26,7 @@ export default async function MainAppLayout({
 
   return (
     <PortfolioProvider>
+      <ActivePortfolioIdProvider />
       <SidebarProvider defaultOpen={defaultOpen} className="h-svh">
         <AppSidebar variant="inset" />
         <SidebarInset>

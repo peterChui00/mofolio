@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie';
 import { StateCreator } from 'zustand';
 
 import { Store } from '@/lib/store';
@@ -24,7 +25,7 @@ export type AppActions = {
   setEditTradeDialogState(
     editTradeDialogState: AppState['editTradeDialogState']
   ): void;
-  setActivePortfolioId(activePortfolioId: AppState['activePortfolioId']): void;
+  setActivePortfolioId(activePortfolioId: string): void;
 };
 
 export type AppSlice = AppState & AppActions;
@@ -36,7 +37,7 @@ export const initialAppState: AppState = {
   editTradeDialogState: {
     title: 'Add Trade',
   },
-  activePortfolioId: undefined,
+  activePortfolioId: Cookies.get('activePortfolioId'),
 };
 
 export const createAppSlice: StateCreator<Store, [], [], AppSlice> = (set) => ({
@@ -59,5 +60,12 @@ export const createAppSlice: StateCreator<Store, [], [], AppSlice> = (set) => ({
   setEditTradeDialogState: (editTradeDialogState) =>
     set({ editTradeDialogState }),
 
-  setActivePortfolioId: (activePortfolioId) => set({ activePortfolioId }),
+  setActivePortfolioId: (activePortfolioId) => {
+    Cookies.set('activePortfolioId', activePortfolioId, {
+      expires: 30, // keep for 30 days
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Lax',
+    });
+    set({ activePortfolioId });
+  },
 });

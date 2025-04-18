@@ -2,6 +2,7 @@
 
 import { ChevronsUpDownIcon, PlusIcon } from 'lucide-react';
 
+import { useActivePortfolioId } from '@/hooks/use-active-portfolio-id';
 import { usePortfolios } from '@/hooks/use-portfolios';
 import {
   DropdownMenu,
@@ -17,7 +18,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { useStore } from '@/components/providers/app-store-provider';
 
 export function PortfolioSwitcher({
   className,
@@ -25,8 +25,7 @@ export function PortfolioSwitcher({
 }: React.ComponentProps<typeof SidebarMenu>) {
   const { isMobile } = useSidebar();
   const { data: portfolios, isSuccess } = usePortfolios();
-  const activePortfolioId = useStore((state) => state.activePortfolioId);
-  const setActivePortfolioId = useStore((state) => state.setActivePortfolioId);
+  const { activePortfolioId, setActivePortfolioId } = useActivePortfolioId();
 
   const activePortfolio = (() => {
     if (!isSuccess || !portfolios?.length) {
