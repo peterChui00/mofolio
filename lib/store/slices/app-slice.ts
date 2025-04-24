@@ -2,7 +2,6 @@ import Cookies from 'js-cookie';
 import { StateCreator } from 'zustand';
 
 import { Store } from '@/lib/store';
-import { EditTradeFromProps } from '@/components/trades/edit-trade-form';
 
 export interface AppState {
   isLoading: boolean;
@@ -10,7 +9,6 @@ export interface AppState {
   isEditTradeDialogOpen: boolean;
   editTradeDialogState: {
     title: string;
-    formProps?: EditTradeFromProps;
   };
   activePortfolioId?: string;
 }

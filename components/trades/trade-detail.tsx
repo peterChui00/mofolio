@@ -29,38 +29,9 @@ export default function TradeDetail({ id }: { id: string }) {
   const slOrders = orders.filter((order) => order.status === 'STOP_LOSS');
   const tpOrders = orders.filter((order) => order.status === 'TAKE_PROFIT');
 
-  const onAddSLOrTPClick = (
-    title: string,
-    status: 'STOP_LOSS' | 'TAKE_PROFIT'
-  ) => {
+  const onAddSLOrTPClick = (title: string) => {
     setEditTradeDialogState({
       title,
-      formProps: {
-        defaultValues: {
-          timestamp: new Date(),
-          symbol,
-          type: side === 'LONG' ? 'SELL' : 'BUY',
-          fee: 0,
-          status,
-        },
-        fieldOptions: {
-          timestamp: {
-            visible: false,
-          },
-          symbol: {
-            disabled: true,
-          },
-          type: {
-            disabled: true,
-          },
-          fee: {
-            visible: false,
-          },
-          status: {
-            visible: false,
-          },
-        },
-      },
     });
     toggleEditTradeDialog(true);
   };
@@ -112,9 +83,7 @@ export default function TradeDetail({ id }: { id: string }) {
             Stop Loss
             <Button
               variant="secondary"
-              onClick={() =>
-                onAddSLOrTPClick('Add stop loss order', 'STOP_LOSS')
-              }
+              onClick={() => onAddSLOrTPClick('Add stop loss order')}
             >
               <SquarePlus />
               Add SL
@@ -137,9 +106,7 @@ export default function TradeDetail({ id }: { id: string }) {
             Take Profit
             <Button
               variant="secondary"
-              onClick={() =>
-                onAddSLOrTPClick('Add take profit order', 'TAKE_PROFIT')
-              }
+              onClick={() => onAddSLOrTPClick('Add take profit order')}
             >
               <SquarePlus />
               Add TP

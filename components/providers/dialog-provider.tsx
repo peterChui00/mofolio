@@ -1,7 +1,7 @@
 'use client';
 
 import { useStore } from '@/components/providers/app-store-provider';
-import EditTradeDialog from '@/components/trades/edit-trade-dialog';
+import EditTradeDialog from '@/components/trades/edit/edit-trade-dialog';
 
 export default function DialogProvider() {
   const isEditTradeDialogOpen = useStore(
@@ -21,7 +21,6 @@ export default function DialogProvider() {
         open={isEditTradeDialogOpen}
         onOpenChange={onEditTradeDialogOpenChange}
         title={editTradeDialogState.title}
-        formProps={editTradeDialogState.formProps}
       />
     </>
   );
