@@ -1,37 +1,14 @@
-'use client';
-
-import { ComputedTrade } from '@/types';
-import { ColumnDef, Row, SortingFn } from '@tanstack/react-table';
+import { TradeSummary } from '@/types';
+import { ColumnDef } from '@tanstack/react-table';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import TradeTableActions from '@/components/trades/trade-table-actions';
 
-export const statusSortingOrder = {
-  OPEN: 2,
-  PENDING: 1,
-  WIN: 0,
-  LOSS: 0,
-};
-
-export const statusCompareFn = (
-  statusA: ComputedTrade['status'],
-  statusB: ComputedTrade['status']
-) => (statusSortingOrder[statusB] ?? 0) - (statusSortingOrder[statusA] ?? 0);
-
-const statusSortingFn: SortingFn<ComputedTrade> = (
-  rowA: Row<ComputedTrade>,
-  rowB: Row<ComputedTrade>,
-  columnId: string
-) => {
-  const statusA = rowA.getValue(columnId) as ComputedTrade['status'];
-  const statusB = rowB.getValue(columnId) as ComputedTrade['status'];
-  return statusCompareFn(statusA, statusB);
-};
-
-export const tradeTableColumns: ColumnDef<ComputedTrade>[] = [
+export const tradeTableColumns: ColumnDef<TradeSummary>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -80,6 +57,7 @@ export const tradeTableColumns: ColumnDef<ComputedTrade>[] = [
       );
     },
   },
+
   {
     accessorKey: 'status',
     header: ({ column }) => (
@@ -91,7 +69,6 @@ export const tradeTableColumns: ColumnDef<ComputedTrade>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
     },
-    sortingFn: statusSortingFn,
   },
   {
     accessorKey: 'side',
@@ -119,7 +96,7 @@ export const tradeTableColumns: ColumnDef<ComputedTrade>[] = [
     ),
   },
   {
-    accessorKey: 'avgPrice',
+    accessorKey: 'average_price',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Avg. Price" />
     ),
@@ -129,14 +106,32 @@ export const tradeTableColumns: ColumnDef<ComputedTrade>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="P&L" />
     ),
+    cell: ({ row }) => {
+      return typeof row.original.pnl !== 'number' ? 0 : row.original.pnl;
+    },
   },
   {
     accessorKey: 'fee',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Fee" />
     ),
+  },
+  {
+    accessorKey: 'opened_at',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Opened At" />
+    ),
     cell: ({ row }) => {
-      return row.original.fee.toFixed(3);
+      return (
+        row.original.opened_at &&
+        new Date(row.original.opened_at).toLocaleDateString()
+      );
     },
+  },
+  {
+    accessorKey: 'actions',
+    header: () => <span className="sr-only">Actions</span>,
+    cell: ({ row }) => <TradeTableActions row={row} />,
+    enableHiding: false,
   },
 ];

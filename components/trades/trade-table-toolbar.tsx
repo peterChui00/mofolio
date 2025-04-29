@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import { tradeSides, tradeStatuses } from '@/data/trade';
-import { ComputedTrade } from '@/types';
+import { TradeSummary } from '@/types';
 import { RowSelectionState, Table } from '@tanstack/react-table';
 import { ChevronDown, Trash2, X } from 'lucide-react';
+import { toast } from 'sonner';
 
+import { useSupabase } from '@/hooks/use-supabase';
+import { useDeleteTrade } from '@/hooks/use-trades';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -14,26 +16,27 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { ConfirmationDialog } from '@/components/confirmation-dialog';
 import { DataTableColumnOptions } from '@/components/data-table/data-table-column-options';
 import { DataTableFacetedFilter } from '@/components/data-table/data-table-faceted-filter';
 import { useStore } from '@/components/providers/app-store-provider';
 
-interface DataTableToolbarProps<TData> {
-  table: Table<TData>;
+type DataTableToolbarProps = {
+  table: Table<TradeSummary>;
   orderRowSelection?: RowSelectionState;
   orderRowSelectionId?: string;
-}
+};
 
-export function TradeTableToolbar<TData extends ComputedTrade>({
+export function TradeTableToolbar({
   table,
   orderRowSelection = {},
   orderRowSelectionId,
-}: DataTableToolbarProps<TData>) {
-  const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] =
-    useState(false);
-  const deleteTrade = useStore((state) => state.deleteTrade);
-  const deleteOrder = useStore((state) => state.deleteOrder);
+}: DataTableToolbarProps) {
+  const supabase = useSupabase();
+  const toggleConfirmDialog = useStore((state) => state.toggleConfirmDialog);
+  const toggleConfirmDialogLoading = useStore(
+    (state) => state.toggleConfirmDialogLoading
+  );
+  const deleteTradeMutation = useDeleteTrade({ client: supabase });
 
   const isFiltered = table.getState().columnFilters.length > 0;
   const filteredRowSelection = table.getFilteredSelectedRowModel().rows;
@@ -41,15 +44,31 @@ export function TradeTableToolbar<TData extends ComputedTrade>({
   const isOrderRowSelection =
     orderRowSelectionArr.length > 0 &&
     table.getRowModel().rows.find((row) => row.id === orderRowSelectionId);
-  const selectionLabel = (isOrderRowSelection ? 'order' : 'trade') + '(s)';
+  const selectionLabel =
+    (isOrderRowSelection ? 'order' : 'trade') +
+    (filteredRowSelection.length > 1 ? 's' : '');
 
-  const handleDeleteTradeOrOrder = () =>
-    isOrderRowSelection
-      ? deleteOrder(orderRowSelectionArr)
-      : deleteTrade(filteredRowSelection.map((row) => row.original.id));
+  const deleteTradeOrOrder = async () => {
+    toggleConfirmDialogLoading(true);
+    deleteTradeMutation.mutate(
+      filteredRowSelection.map((row) => row.original.id),
+      {
+        onError: () => toast.error('Failed to delete ' + selectionLabel),
+        onSettled: () => toggleConfirmDialogLoading(false),
+      }
+    );
+  };
 
-  const toggleConfirmationDialog = () =>
-    setIsConfirmationDialogOpen(!isConfirmationDialogOpen);
+  const confirmDeletion = () => {
+    toggleConfirmDialog(true, {
+      title: `Delete ${selectionLabel}?`,
+      description: `Are you sure you want to delete ${selectionLabel}? This action cannot be undone.`,
+      confirmVariant: 'destructive',
+      onCancel: () => toggleConfirmDialog(false),
+      onConfirm: deleteTradeOrOrder,
+      confirmingText: 'Deleting...',
+    });
+  };
 
   return (
     <div className="flex items-center justify-between">
@@ -66,8 +85,11 @@ export function TradeTableToolbar<TData extends ComputedTrade>({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={toggleConfirmationDialog}>
-                <Trash2 />
+              <DropdownMenuItem
+                onClick={confirmDeletion}
+                className="focus:text-destructive"
+              >
+                <Trash2 className="focus:text-destructive" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -109,15 +131,6 @@ export function TradeTableToolbar<TData extends ComputedTrade>({
         )}
       </div>
       <DataTableColumnOptions table={table} />
-
-      <ConfirmationDialog
-        isOpen={isConfirmationDialogOpen}
-        onClose={toggleConfirmationDialog}
-        onConfirm={handleDeleteTradeOrOrder}
-        title={`Delete ${selectionLabel}?`}
-        description={`This action cannot be undone. This will permanently delete your ${selectionLabel}.`}
-        confirmVariant="destructive"
-      />
     </div>
   );
 }

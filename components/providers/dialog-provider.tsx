@@ -1,5 +1,6 @@
 'use client';
 
+import GeneralConfirmationDialog from '@/components/general-confirmation-dialog';
 import { useStore } from '@/components/providers/app-store-provider';
 import EditTradeDialog from '@/components/trades/edit/edit-trade-dialog';
 
@@ -17,6 +18,7 @@ export default function DialogProvider() {
 
   return (
     <>
+      <GeneralConfirmationDialog />
       <EditTradeDialog
         open={isEditTradeDialogOpen}
         onOpenChange={onEditTradeDialogOpenChange}

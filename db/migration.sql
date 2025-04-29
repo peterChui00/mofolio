@@ -73,6 +73,172 @@ CREATE TABLE journal_entry_tags (
   PRIMARY KEY (journal_entry_id, tag_id)
 );
 
+CREATE OR REPLACE VIEW public.trade_summary WITH ( security_invoker = ON
+) AS
+-- Pre-aggregate order data
+WITH order_aggregates AS (
+    SELECT
+        o.trade_id,
+        -- Position
+        SUM(
+            CASE WHEN o.status = 'FILLED'
+                AND o.action = 'BUY' THEN
+                o.quantity
+            WHEN o.status = 'FILLED'
+                AND o.action = 'SELL' THEN
+                - o.quantity
+            ELSE
+                0
+            END) AS position,
+        -- Total fee
+        SUM(
+            CASE WHEN o.status = 'FILLED' THEN
+                o.fee
+            ELSE
+                0
+            END) AS total_fee,
+        -- BUY
+        SUM(
+            CASE WHEN o.status = 'FILLED'
+                AND o.action = 'BUY' THEN
+                o.quantity
+            ELSE
+                0
+            END) AS total_buy_qty,
+        SUM(
+            CASE WHEN o.status = 'FILLED'
+                AND o.action = 'BUY' THEN
+                o.quantity * o.price
+            ELSE
+                0
+            END) AS total_buy_value,
+        -- SELL
+        SUM(
+            CASE WHEN o.status = 'FILLED'
+                AND o.action = 'SELL' THEN
+                o.quantity
+            ELSE
+                0
+            END) AS total_sell_qty,
+        SUM(
+            CASE WHEN o.status = 'FILLED'
+                AND o.action = 'SELL' THEN
+                o.quantity * o.price
+            ELSE
+                0
+            END) AS total_sell_value,
+        -- Gross PnL
+        SUM(
+            CASE WHEN o.status = 'FILLED'
+                AND o.action = 'SELL' THEN
+                o.quantity * o.price
+            WHEN o.status = 'FILLED'
+                AND o.action = 'BUY' THEN
+                - o.quantity * o.price
+            ELSE
+                0
+            END) AS gross_pnl
+    FROM
+        orders o
+    WHERE
+        o.status = 'FILLED' -- Filter early to reduce rows
+    GROUP BY
+        o.trade_id
+),
+-- Calculate PnL
+pnl_calc AS (
+    SELECT
+        t.id AS trade_id,
+        t.side,
+        oa.total_buy_qty,
+        oa.total_sell_qty,
+        oa.total_buy_value,
+        oa.total_sell_value,
+        oa.total_fee,
+        -- Avg Buy Price
+        CASE WHEN oa.total_buy_qty = 0 THEN
+            0
+        ELSE
+            oa.total_buy_value / oa.total_buy_qty
+        END AS avg_buy_price,
+        -- Avg Sell Price
+        CASE WHEN oa.total_sell_qty = 0 THEN
+            0
+        ELSE
+            oa.total_sell_value / oa.total_sell_qty
+        END AS avg_sell_price,
+        -- Gross PnL（without fee）
+        CASE WHEN t.side = 'LONG' THEN
+            ROUND(LEAST (oa.total_buy_qty, oa.total_sell_qty) * (oa.total_sell_value / NULLIF (oa.total_sell_qty, 0) - oa.total_buy_value / NULLIF (oa.total_buy_qty, 0)), 3)
+        WHEN t.side = 'SHORT' THEN
+            ROUND(LEAST (oa.total_sell_qty, oa.total_buy_qty) * (oa.total_sell_value / NULLIF (oa.total_sell_qty, 0) - oa.total_buy_value / NULLIF (oa.total_buy_qty, 0)), 3)
+        ELSE
+            0
+        END AS gross_pnl,
+        -- Realized PnL
+        CASE WHEN t.side = 'LONG' THEN
+            ROUND(LEAST (oa.total_buy_qty, oa.total_sell_qty) * (oa.total_sell_value / NULLIF (oa.total_sell_qty, 0) - oa.total_buy_value / NULLIF (oa.total_buy_qty, 0)) - oa.total_fee, 3)
+        WHEN t.side = 'SHORT' THEN
+            ROUND(LEAST (oa.total_sell_qty, oa.total_buy_qty) * (oa.total_sell_value / NULLIF (oa.total_sell_qty, 0) - oa.total_buy_value / NULLIF (oa.total_buy_qty, 0)) - oa.total_fee, 3)
+        ELSE
+            0
+        END AS realized_pnl
+    FROM
+        order_aggregates oa
+        JOIN trades t ON t.id = oa.trade_id)
+    SELECT
+        t.id,
+        t.portfolio_id,
+        t.symbol,
+        t.side,
+        t.notes,
+        t.opened_at,
+        t.closed_at,
+    -- Tags
+    ARRAY_REMOVE(ARRAY_AGG(DISTINCT tg.name), NULL) AS tags,
+    -- Position
+    COALESCE(oa.position, 0) AS position,
+    -- Total fee
+    COALESCE(oa.total_fee, 0) AS fee,
+    -- Average price
+    CASE WHEN t.side = 'LONG'
+        AND oa.total_buy_qty > 0 THEN
+        ROUND(oa.total_buy_value / oa.total_buy_qty, 3)
+    WHEN t.side = 'SHORT'
+        AND oa.total_sell_qty > 0 THEN
+        ROUND(oa.total_sell_value / oa.total_sell_qty, 3)
+    ELSE
+        0
+    END AS average_price,
+    -- PnL
+    pnlc.realized_pnl AS pnl,
+    -- Status
+    CASE WHEN COALESCE(oa.position, 0) != 0 THEN
+        'OPEN'
+    WHEN pnlc.gross_pnl > 0 THEN
+        'WIN'
+    WHEN pnlc.gross_pnl < 0 THEN
+        'LOSS'
+    ELSE
+        'BREAK_EVEN'
+    END AS status
+FROM
+    trades t
+    LEFT JOIN order_aggregates oa ON oa.trade_id = t.id
+    LEFT JOIN pnl_calc pnlc ON pnlc.trade_id = t.id
+    LEFT JOIN trade_tags tt ON tt.trade_id = t.id
+    LEFT JOIN tags tg ON tg.id = tt.tag_id
+GROUP BY
+    t.id,
+    oa.position,
+    oa.total_fee,
+    oa.total_buy_qty,
+    oa.total_buy_value,
+    oa.total_sell_qty,
+    oa.total_sell_value,
+    pnlc.realized_pnl,
+    pnlc.gross_pnl;
+
 -- Create trigger function to handle new user creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger

@@ -130,6 +130,13 @@ export type Database = {
             foreignKeyName: 'orders_trade_id_fkey';
             columns: ['trade_id'];
             isOneToOne: false;
+            referencedRelation: 'trade_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'orders_trade_id_fkey';
+            columns: ['trade_id'];
+            isOneToOne: false;
             referencedRelation: 'trades';
             referencedColumns: ['id'];
           },
@@ -205,6 +212,13 @@ export type Database = {
             foreignKeyName: 'trade_tags_trade_id_fkey';
             columns: ['trade_id'];
             isOneToOne: false;
+            referencedRelation: 'trade_summary';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'trade_tags_trade_id_fkey';
+            columns: ['trade_id'];
+            isOneToOne: false;
             referencedRelation: 'trades';
             referencedColumns: ['id'];
           },
@@ -253,7 +267,32 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      trade_summary: {
+        Row: {
+          average_price: number | null;
+          closed_at: string | null;
+          fee: number | null;
+          id: string | null;
+          notes: string | null;
+          opened_at: string | null;
+          pnl: number | null;
+          portfolio_id: string | null;
+          position: number | null;
+          side: Database['public']['Enums']['position_side'] | null;
+          status: string | null;
+          symbol: string | null;
+          tags: string[] | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'trades_portfolio_id_fkey';
+            columns: ['portfolio_id'];
+            isOneToOne: false;
+            referencedRelation: 'portfolios';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Functions: {
       nanoid: {
