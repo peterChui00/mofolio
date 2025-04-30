@@ -1,6 +1,6 @@
 import { TradeSummary, TypeSupabaseClient } from '@/types';
 
-import { TradeTableSearchParams } from '@/hooks/use-trade-table-state';
+import { ReactTableSearchParams } from '@/hooks/use-react-table-state';
 
 const getPagination = (page: number, size: number) => {
   const pageIndex = page ? page - 1 : 0; // Convert to 0-based index
@@ -13,13 +13,13 @@ const getPagination = (page: number, size: number) => {
 
 export const getTradeSummaries = async (
   client: TypeSupabaseClient,
-  searchParams: TradeTableSearchParams = { page: 1 }
+  searchParams: ReactTableSearchParams = { page: 1 }
 ) => {
   const {
     page = 1,
     pageSize = 10,
     sortBy = 'opened_at',
-    sort = 'asc',
+    sort = 'desc',
     filters = [],
   } = searchParams;
   const { from, to } = getPagination(page, pageSize);

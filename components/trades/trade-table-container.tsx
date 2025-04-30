@@ -3,12 +3,11 @@
 import {
   getCoreRowModel,
   getExpandedRowModel,
-  getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
 
+import { useReactTableState } from '@/hooks/use-react-table-state';
 import { useSupabase } from '@/hooks/use-supabase';
-import { useTradeTableState } from '@/hooks/use-trade-table-state';
 import { useTradeSummaries } from '@/hooks/use-trades';
 import TradeTable from '@/components/trades/trade-table';
 import { tradeTableColumns } from '@/components/trades/trade-table-columns';
@@ -25,7 +24,7 @@ export default function TradeTableContainer() {
     columnVisibility,
     setColumnVisibility,
     searchParams,
-  } = useTradeTableState();
+  } = useReactTableState();
   const { data: tradeSummaries, isLoading } = useTradeSummaries({
     client: supabase,
     searchParams,
@@ -50,7 +49,6 @@ export default function TradeTableContainer() {
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: () => true,
     getRowId: (row) => row.id,
