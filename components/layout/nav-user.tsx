@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   CircleHelpIcon,
   LogInIcon,
@@ -30,6 +31,7 @@ import UserAvatar from '@/components/layout/user-avatar';
 import { useStore } from '@/components/providers/app-store-provider';
 
 export function NavUser() {
+  const router = useRouter();
   const { isMobile } = useSidebar();
   const user = useStore((state) => state.user);
   const isAuthLoading = useStore((state) => state.isAuthLoading);
@@ -37,7 +39,10 @@ export function NavUser() {
   const username: string = user?.user_metadata.name ?? 'Anonymous';
   const userAvatar: string | undefined = user?.user_metadata.avatar_url;
 
-  const logout = () => createClient().auth.signOut();
+  const logout = async () => {
+    await createClient().auth.signOut();
+    router.push('/login');
+  };
 
   return (
     <SidebarMenu>
