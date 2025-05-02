@@ -13,6 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { DataTablePagination } from '@/components/data-table/data-table-pagination';
+import OrderTableContainer from '@/components/trades/order-table-container';
 import { TradeTableToolbar } from '@/components/trades/trade-table-toolbar';
 
 export default function TradeTable({
@@ -24,11 +25,7 @@ export default function TradeTable({
 }) {
   return (
     <div className="flex h-full flex-col space-y-4">
-      <TradeTableToolbar
-        table={table}
-        // orderRowSelection={orderRowSelection}
-        // orderRowSelectionId={orderRowSelectionId}
-      />
+      <TradeTableToolbar table={table} />
       <div className="flex-1 overflow-auto rounded-md border">
         <Table>
           <TableHeader>
@@ -82,14 +79,7 @@ export default function TradeTable({
                   {row.getIsExpanded() && (
                     <TableRow className="hover:bg-background">
                       <TableCell colSpan={row.getVisibleCells().length}>
-                        {/* <OrderTable
-                          tradeId={row.original.id}
-                          data={row.original.orders}
-                          columns={orderTableColumns}
-                          rowSelectionId={orderRowSelectionId}
-                          onRowSelectionChange={onOrderRowSelectionChange}
-                          className="px-4"
-                        /> */}
+                        <OrderTableContainer tradeId={row.original.id} />
                       </TableCell>
                     </TableRow>
                   )}

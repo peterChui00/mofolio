@@ -2,6 +2,23 @@ import { TypeSupabaseClient } from '@/types';
 
 import { EditTradeFormValues } from '@/hooks/use-edit-trade-form';
 
+export const getOrders = async (
+  client: TypeSupabaseClient,
+  tradeId?: string
+) => {
+  let query = client
+    .from('orders')
+    .select('*')
+    .order('executed_at', { ascending: false })
+    .throwOnError();
+
+  if (tradeId) {
+    query = query.eq('trade_id', tradeId);
+  }
+
+  return query;
+};
+
 export type AddOrderInput = EditTradeFormValues & {
   portfolioId: string;
   symbol: string;

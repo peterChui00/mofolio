@@ -1,25 +1,8 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import { Order } from '@/types';
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  flexRender,
-  getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  RowSelectionState,
-  SortingState,
-  Updater,
-  useReactTable,
-  VisibilityState,
-} from '@tanstack/react-table';
+import { flexRender, Table as ReactTable } from '@tanstack/react-table';
 
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -29,74 +12,18 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-interface TradeTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  tradeId: string;
-  rowSelectionId?: string;
-  onRowSelectionChange?: (
-    selection: RowSelectionState,
-    tradeId?: string
-  ) => void;
-  className?: string;
-}
-
-export function OrderTable<TData extends Order, TValue>({
-  columns,
-  data,
-  tradeId,
-  rowSelectionId,
-  onRowSelectionChange,
+export default function OrderTable({
+  table,
+  isLoading,
   className,
-}: TradeTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [sorting, setSorting] = useState<SortingState>([]);
-
-  const handleRowChange = (updater: Updater<RowSelectionState>) => {
-    const newState =
-      typeof updater === 'function' ? updater(rowSelection) : updater;
-    setRowSelection(newState);
-
-    if (typeof onRowSelectionChange === 'function') {
-      onRowSelectionChange(newState, tradeId);
-    }
-  };
-
-  const table = useReactTable({
-    data,
-    columns,
-    state: {
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-    },
-    enableRowSelection: true,
-    onRowSelectionChange: handleRowChange,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    getRowId: (originalRow) => originalRow.id,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-  });
-
-  useEffect(() => {
-    // Reset row selection when selecting other trade
-    if (rowSelectionId !== tradeId) {
-      setRowSelection({});
-    }
-  }, [tradeId, rowSelectionId]);
-
+}: {
+  table: ReactTable<Order>;
+  isLoading?: boolean;
+  className?: string;
+}) {
   return (
     <div className={cn('flex h-full flex-col space-y-4', className)}>
-      <div className="flex-1 overflow-auto rounded-md">
+      <div className="flex-1 overflow-auto rounded-md border">
         <Table>
           <TableHeader className="border-b">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -117,7 +44,19 @@ export function OrderTable<TData extends Order, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              Array.from({ length: 2 }).map((_, index) => (
+                <TableRow key={`loading-${index}`}>
+                  {Array.from({ length: table.getAllColumns().length }).map(
+                    (_, cellIndex) => (
+                      <TableCell key={`loading-cell-${cellIndex}`}>
+                        <Skeleton className="h-6 w-full" />
+                      </TableCell>
+                    )
+                  )}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -136,7 +75,7 @@ export function OrderTable<TData extends Order, TValue>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={table.getAllColumns().length}
                   className="h-24 text-center"
                 >
                   No orders.

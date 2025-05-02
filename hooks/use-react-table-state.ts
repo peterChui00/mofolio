@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import {
   ColumnFiltersState,
+  ExpandedState,
   PaginationState,
+  RowSelectionState,
   SortingState,
   VisibilityState,
 } from '@tanstack/react-table';
@@ -40,6 +42,8 @@ export function useReactTableState({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     defaultValues.columnVisibility || {}
   );
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [expanded, setExpanded] = useState<ExpandedState>({});
 
   const searchParams: ReactTableSearchParams = useMemo(
     () => ({
@@ -62,6 +66,10 @@ export function useReactTableState({
     setColumnFilters,
     columnVisibility,
     setColumnVisibility,
+    rowSelection,
+    setRowSelection,
+    expanded,
+    setExpanded,
     searchParams,
   };
 }

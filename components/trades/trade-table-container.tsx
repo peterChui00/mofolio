@@ -23,12 +23,18 @@ export default function TradeTableContainer() {
     setColumnFilters,
     columnVisibility,
     setColumnVisibility,
+    rowSelection,
+    setRowSelection,
+    expanded,
+    setExpanded,
     searchParams,
   } = useReactTableState();
+
   const { data: tradeSummaries, isLoading } = useTradeSummaries({
     client: supabase,
     searchParams,
   });
+
   const table = useReactTable({
     data: tradeSummaries?.data || [],
     columns: tradeTableColumns,
@@ -40,6 +46,8 @@ export default function TradeTableContainer() {
       sorting,
       columnFilters,
       columnVisibility,
+      rowSelection,
+      expanded,
     },
     pageCount: Math.ceil(
       (tradeSummaries?.count || 0) / (pagination.pageSize || 1)
@@ -48,6 +56,14 @@ export default function TradeTableContainer() {
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    onExpandedChange: (updater) => {
+      const nextState = typeof updater === 'function' ? updater({}) : updater;
+      // Only allow one row to be expanded at a time
+      setExpanded(
+        Object.keys(expanded)[0] === Object.keys(nextState)[0] ? {} : nextState
+      );
+    },
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: () => true,

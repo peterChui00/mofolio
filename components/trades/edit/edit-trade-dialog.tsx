@@ -7,7 +7,7 @@ import {
   EditTradeFormValues,
   useEditTradeForm,
 } from '@/hooks/use-edit-trade-form';
-import { useAddOrder } from '@/hooks/use-order';
+import { useAddOrder } from '@/hooks/use-orders';
 import { useSupabase } from '@/hooks/use-supabase';
 import { Button } from '@/components/ui/button';
 import {
