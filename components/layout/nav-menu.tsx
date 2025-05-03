@@ -1,13 +1,23 @@
-import React from 'react';
+'use client';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { LucideIcon } from 'lucide-react';
 
 import {
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { NavMenuItem } from '@/components/layout/app-sidebar';
+
+export type NavMenuItem = {
+  title: string;
+  url: string;
+  icon?: LucideIcon;
+  badge?: React.ReactNode;
+  isActive?: boolean;
+};
 
 export default function NavMenu({
   items,
@@ -24,13 +34,14 @@ export default function NavMenu({
           <SidebarMenuButton
             tooltip={item.title}
             asChild
-            isActive={pathname.startsWith(item.url)}
+            isActive={item.isActive || pathname.startsWith(item.url)}
           >
             <Link href={item.url}>
               {item.icon && <item.icon />}
               <span>{item.title}</span>
             </Link>
           </SidebarMenuButton>
+          {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
         </SidebarMenuItem>
       ))}
     </SidebarMenu>

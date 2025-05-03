@@ -124,3 +124,11 @@
     cursor: pointer;
   }
 }
+
+@utility display-eq-sm {
+  @apply block md:hidden;
+}
+
+@utility display-gt-sm {
+  @apply hidden md:block;
+}

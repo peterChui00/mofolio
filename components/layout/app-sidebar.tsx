@@ -2,7 +2,6 @@
 
 import {
   LayoutDashboardIcon,
-  LucideIcon,
   NotebookIcon,
   ReceiptTextIcon,
   SettingsIcon,
@@ -17,14 +16,9 @@ import {
 } from '@/components/ui/sidebar';
 import { NavGroupMain } from '@/components/layout/nav-group-main';
 import { NavGroupSecondary } from '@/components/layout/nav-group-secondary';
+import { NavMenuItem } from '@/components/layout/nav-menu';
 import { NavUser } from '@/components/layout/nav-user';
 import { PortfolioSwitcher } from '@/components/layout/portfolio-switcher';
-
-export type NavMenuItem = {
-  title: string;
-  url: string;
-  icon?: LucideIcon;
-};
 
 const navData: Record<string, NavMenuItem[]> = {
   navMain: [
