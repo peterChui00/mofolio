@@ -6,9 +6,18 @@ CREATE TYPE order_status AS ENUM ('PENDING', 'FILLED');
 CREATE TYPE order_action AS ENUM ('BUY', 'SELL');
 
 -- Tag
+CREATE TABLE tag_groups (
+  id TEXT DEFAULT nanoid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT unique_tag_group_name UNIQUE (user_id, name)
+);
+
 CREATE TABLE tags (
   id TEXT DEFAULT nanoid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  group_id TEXT REFERENCES tag_groups(id) ON DELETE SET NULL;
   name TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   CONSTRAINT unique_tag_name UNIQUE (user_id, name)
@@ -239,6 +248,63 @@ GROUP BY
     pnlc.realized_pnl,
     pnlc.gross_pnl;
 
+-- RPC function to get tag groups by user
+CREATE OR REPLACE FUNCTION get_tags_grouped(uid UUID)
+RETURNS JSONB
+LANGUAGE sql
+SET search_path = public
+AS $$
+  SELECT json_agg(ordered_result)
+  FROM (
+    SELECT group_id, group_name, tags FROM (
+      -- Grouped tags
+      SELECT
+        tg.id AS group_id,
+        tg.name AS group_name,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', t.id,
+              'name', t.name
+            )
+            ORDER BY t.created_at
+          ) FILTER (WHERE t.id IS NOT NULL),
+          '[]'::json
+        ) AS tags,
+        tg.created_at AS group_created_at,
+        0 AS sort_order
+      FROM
+        tag_groups tg
+      LEFT JOIN tags t ON t.group_id = tg.id AND t.user_id = uid
+      WHERE
+        tg.user_id = uid
+      GROUP BY
+        tg.id, tg.name, tg.created_at
+
+      UNION ALL
+
+      -- Ungrouped tags
+      SELECT
+        'ungrouped' AS group_id,
+        'Ungrouped' AS group_name,
+        json_agg(
+          json_build_object(
+            'id', t.id,
+            'name', t.name
+          )
+          ORDER BY t.created_at
+        ) AS tags,
+        NULL AS group_created_at,
+        1 AS sort_order 
+      FROM
+        tags t
+      WHERE
+        t.user_id = uid AND t.group_id IS NULL
+    ) AS combined_result
+    ORDER BY sort_order, group_created_at DESC
+  ) AS ordered_result;
+$$;
+
 -- Create trigger function to handle new user creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger
@@ -265,6 +331,8 @@ FOR EACH ROW
 EXECUTE PROCEDURE public.handle_new_user();
 
 -- Enable Row Level Security
+ALTER TABLE tag_groups ENABLE ROW LEVEL SECURITY;
+
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE portfolios ENABLE ROW LEVEL SECURITY;
@@ -278,6 +346,32 @@ ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE journal_entry_tags ENABLE ROW LEVEL SECURITY;
+
+-- Tag Group Policies
+CREATE POLICY "Users can view their own tag groups"
+ON tag_groups
+FOR SELECT
+TO authenticated
+USING (user_id = auth.uid());
+
+CREATE POLICY "Users can create their own tag groups"
+ON tag_groups
+FOR INSERT
+TO authenticated
+WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "Users can update their own tag groups"
+ON tag_groups
+FOR UPDATE
+TO authenticated
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "Users can delete their own tag groups"
+ON tag_groups
+FOR DELETE
+TO authenticated
+USING (user_id = auth.uid());
 
 -- Tag Policies
 CREATE POLICY "Users can view their own tags"

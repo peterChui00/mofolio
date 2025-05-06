@@ -40,7 +40,7 @@ export default function TradeTableActions({ row }: { row: Row<TradeSummary> }) {
 
   const handleDeleteTrade = () => {
     toggleConfirmDialog(true, {
-      title: 'Delete Trade',
+      title: 'Delete trade',
       description:
         'Are you sure you want to delete this trade? This action cannot be undone.',
       confirmVariant: 'destructive',

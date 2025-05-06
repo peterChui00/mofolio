@@ -166,7 +166,7 @@ export type Database = {
         };
         Relationships: [];
       };
-      tags: {
+      tag_groups: {
         Row: {
           created_at: string | null;
           id: string;
@@ -186,6 +186,38 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [];
+      };
+      tags: {
+        Row: {
+          created_at: string | null;
+          group_id: string | null;
+          id: string;
+          name: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          group_id?: string | null;
+          id?: string;
+          name: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string | null;
+          group_id?: string | null;
+          id?: string;
+          name?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'tags_group_id_fkey';
+            columns: ['group_id'];
+            isOneToOne: false;
+            referencedRelation: 'tag_groups';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       trade_tags: {
         Row: {
@@ -295,6 +327,10 @@ export type Database = {
       };
     };
     Functions: {
+      get_tags_grouped: {
+        Args: { uid: string };
+        Returns: Json;
+      };
       nanoid: {
         Args: {
           size?: number;

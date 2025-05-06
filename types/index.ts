@@ -16,3 +16,14 @@ export type TradeSummary = RemoveNullExcept<
 >;
 
 export type Order = Tables<'orders'>;
+
+export type TagInGroup = {
+  id: string;
+  name: string;
+};
+
+export type TagGroupWithTags = {
+  group_id: string;
+  group_name: string;
+  tags: TagInGroup[] | null;
+};

@@ -2,6 +2,8 @@
 
 import GeneralConfirmationDialog from '@/components/general-confirmation-dialog';
 import { useStore } from '@/components/providers/app-store-provider';
+import EditTagDialog from '@/components/tags/edit-tag-dialog';
+import EditTagGroupDialog from '@/components/tags/edit-tag-group-dialog';
 import EditTradeDialog from '@/components/trades/edit/edit-trade-dialog';
 
 export default function DialogProvider() {
@@ -24,6 +26,8 @@ export default function DialogProvider() {
         onOpenChange={onEditTradeDialogOpenChange}
         title={editTradeDialogState.title}
       />
+      <EditTagGroupDialog />
+      <EditTagDialog />
     </>
   );
 }

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ChevronLeftIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import TagManagement from '@/components/tags/tag-management';
 
 export const metadata: Metadata = {
   title: 'Settings',
@@ -18,9 +19,7 @@ export default function TagsSettingsPage() {
         </Link>
       </Button>
 
-      <h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight">
-        Tags
-      </h2>
+      <TagManagement />
     </div>
   );
 }
