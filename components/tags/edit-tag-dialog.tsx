@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
@@ -89,7 +91,7 @@ export default function EditTagDialog({
             form.reset();
             onOpenChange(false);
           },
-          onError: () => toast.error('Failed to update trade'),
+          onError: () => toast.error('Failed to update tag'),
         }
       );
     }
