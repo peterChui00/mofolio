@@ -1,8 +1,7 @@
 import { TypeSupabaseClient } from '@/types';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
-import { addOrder, AddOrderInput, getOrders } from '@/lib/queries/orders';
-import { getQueryClient } from '@/components/providers/query-provider';
+import { getOrders } from '@/lib/queries/orders';
 
 export function useOrders({
   client,
@@ -17,21 +16,21 @@ export function useOrders({
   });
 }
 
-export function useAddOrder({ client }: { client: TypeSupabaseClient }) {
-  return useMutation({
-    mutationFn: (data: AddOrderInput) => addOrder(client, data),
-    onSuccess: () => {
-      const queryClient = getQueryClient();
-      queryClient.invalidateQueries({
-        queryKey: ['trades'],
-      });
+// export function useAddOrder({ client }: { client: TypeSupabaseClient }) {
+//   return useMutation({
+//     mutationFn: (data: AddOrderInput) => addOrder(client, data),
+//     onSuccess: () => {
+//       const queryClient = getQueryClient();
+//       queryClient.invalidateQueries({
+//         queryKey: ['trades'],
+//       });
 
-      queryClient.invalidateQueries({
-        queryKey: ['orders'],
-      });
-    },
-    onError: (error) => {
-      console.error(error);
-    },
-  });
-}
+//       queryClient.invalidateQueries({
+//         queryKey: ['orders'],
+//       });
+//     },
+//     onError: (error) => {
+//       console.error(error);
+//     },
+//   });
+// }

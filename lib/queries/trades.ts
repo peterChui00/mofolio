@@ -1,4 +1,10 @@
-import { TradeSummary, TypeSupabaseClient } from '@/types';
+import {
+  OrderAction,
+  OrderStatus,
+  PositionSide,
+  TradeSummary,
+  TypeSupabaseClient,
+} from '@/types';
 
 import { ReactTableSearchParams } from '@/hooks/use-react-table-state';
 
@@ -44,6 +50,50 @@ export const getTradeSummaries = async (
   }
 
   return query.overrideTypes<TradeSummary[], { merge: false }>();
+};
+
+export type OrderInput = {
+  action: OrderAction;
+  quantity: number;
+  price: number;
+  fee: number;
+  status: OrderStatus;
+  executedAt?: string | null;
+};
+
+export type AddTradeInput = {
+  portfolioId: string;
+  symbol: string;
+  side: PositionSide;
+  notes?: string;
+  openedAt?: string;
+  closedAt?: string;
+  orders: OrderInput[];
+  tagIds?: string[];
+};
+
+export const addTrade = async (
+  client: TypeSupabaseClient,
+  trade: AddTradeInput
+) => {
+  const input = {
+    portfolio_id: trade.portfolioId,
+    symbol: trade.symbol,
+    side: trade.side,
+    notes: trade.notes,
+    opened_at: trade.openedAt,
+    closed_at: trade.closedAt,
+    tag_ids: trade.tagIds,
+    orders: trade.orders.map((order) => ({
+      action: order.action,
+      quantity: order.quantity,
+      price: order.price,
+      fee: order.fee,
+      status: order.status,
+      executed_at: order.executedAt,
+    })),
+  };
+  return client.rpc('add_trade', { input }).throwOnError();
 };
 
 export const deleteTrade = async (

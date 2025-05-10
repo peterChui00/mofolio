@@ -1,3 +1,4 @@
+import { Order } from '@/types';
 import { VariantProps } from 'class-variance-authority';
 import { StateCreator } from 'zustand';
 
@@ -17,12 +18,24 @@ export type DialogSliceState = {
     isLoading?: boolean;
     confirmingText?: string;
   };
+
+  isEditTradeDialogOpen: boolean;
+  editTradeDialog: {
+    title: string;
+    tab?: string;
+    id?: string;
+    symbol?: string;
+    notes?: string;
+    orders?: Order[];
+  };
+
   isEditTagGroupDialogOpen: boolean;
   editTagGroupDialog: {
     title: string;
     tagGroupId?: string;
     tagGroupName?: string;
   };
+
   isEditTagDialogOpen: boolean;
   editTagDialog: {
     title: string;
@@ -39,6 +52,11 @@ export type DialogSliceActions = {
     dialogState?: DialogSliceState['confirmDialog']
   ): void;
   toggleConfirmDialogLoading(isLoading?: boolean): void;
+  toggleEditTradeDialog(
+    open?: boolean,
+    dialogState?: DialogSliceState['editTradeDialog']
+  ): void;
+  setEditTradeDialogTab(tab: string): void;
   toggleEditTagGroupDialog(
     open?: boolean,
     dialogState?: DialogSliceState['editTagGroupDialog']
@@ -63,6 +81,13 @@ export const initialDialogState: DialogSliceState = {
     onCancel: undefined,
     isLoading: false,
     confirmingText: 'Loading...',
+  },
+  isEditTradeDialogOpen: false,
+  editTradeDialog: {
+    title: 'Add trade',
+    tab: 'trade',
+    id: undefined,
+    symbol: undefined,
   },
   isEditTagGroupDialogOpen: false,
   editTagGroupDialog: {
@@ -102,6 +127,26 @@ export const createDialogSlice: StateCreator<Store, [], [], DialogSlice> = (
       confirmDialog: {
         ...state.confirmDialog,
         isLoading: isLoading ?? !state.confirmDialog.isLoading,
+      },
+    }));
+  },
+
+  toggleEditTradeDialog: (open, dialogState) => {
+    set((state) => ({
+      isEditTradeDialogOpen: open ?? !state.isEditTradeDialogOpen,
+      editTradeDialog: {
+        ...state.editTradeDialog,
+        ...(open && initialDialogState.editTradeDialog),
+        ...dialogState,
+      },
+    }));
+  },
+
+  setEditTradeDialogTab: (tab) => {
+    set((state) => ({
+      editTradeDialog: {
+        ...state.editTradeDialog,
+        tab,
       },
     }));
   },

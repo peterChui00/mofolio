@@ -327,6 +327,10 @@ export type Database = {
       };
     };
     Functions: {
+      add_trade: {
+        Args: { input: Json };
+        Returns: string;
+      };
       get_tags_grouped: {
         Args: { uid: string };
         Returns: Json;

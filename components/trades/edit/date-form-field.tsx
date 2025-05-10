@@ -1,9 +1,8 @@
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { UseFormReturn } from 'react-hook-form';
+import { FieldPath, FieldValues, UseFormReturn } from 'react-hook-form';
 
 import { cn } from '@/lib/utils';
-import { EditTradeFormValues } from '@/hooks/use-edit-trade-form';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -19,18 +18,26 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-type Props = {
-  form: UseFormReturn<EditTradeFormValues>;
+type DateFormFieldProps<T extends FieldValues> = {
+  form: UseFormReturn<T>;
+  name: FieldPath<T>;
+  label?: React.ReactNode;
 } & React.ComponentPropsWithoutRef<typeof FormItem>;
 
-export default function DateFormField({ form, ...props }: Props) {
+export default function DateFormField<T extends FieldValues>({
+  form,
+  name,
+  label,
+  className,
+  ...props
+}: DateFormFieldProps<T>) {
   return (
     <FormField
       control={form.control}
-      name="executedAt"
+      name={name}
       render={({ field }) => (
-        <FormItem {...props}>
-          <FormLabel>Date</FormLabel>
+        <FormItem className={className} {...props}>
+          {label && <FormLabel>{label}</FormLabel>}
           <Popover>
             <PopoverTrigger asChild>
               <FormControl>

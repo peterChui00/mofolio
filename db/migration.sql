@@ -17,7 +17,7 @@ CREATE TABLE tag_groups (
 CREATE TABLE tags (
   id TEXT DEFAULT nanoid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  group_id TEXT REFERENCES tag_groups(id) ON DELETE SET NULL;
+  group_id TEXT REFERENCES tag_groups(id) ON DELETE SET NULL,
   name TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   CONSTRAINT unique_tag_name UNIQUE (user_id, name)
@@ -303,6 +303,70 @@ AS $$
     ) AS combined_result
     ORDER BY sort_order, group_created_at DESC
   ) AS ordered_result;
+$$;
+
+CREATE OR REPLACE FUNCTION add_trade(
+  input JSONB
+)
+RETURNS TEXT
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  trade_id TEXT := nanoid();
+  order_item JSONB;
+  tag_id TEXT;
+BEGIN
+  -- Validate input
+  IF input->>'side' NOT IN ('LONG', 'SHORT') THEN
+    RAISE EXCEPTION 'Invalid side value: %. Must be LONG or SHORT.', input->>'side';
+  END IF;
+
+  IF order_item->>'action' NOT IN ('BUY', 'SELL') THEN
+    RAISE EXCEPTION 'Invalid action value: %. Must be BUY or SELL.', order_item->>'action';
+  END IF;
+
+  IF order_item->>'status' NOT IN ('PENDING', 'FILLED') THEN
+    RAISE EXCEPTION 'Invalid status value: %. Must be PENDING or FILLED.', order_item->>'status';
+  END IF;
+
+  -- Insert trade
+  INSERT INTO trades (
+    id, portfolio_id, symbol, side, notes, opened_at, closed_at
+  ) VALUES (
+    trade_id,
+    input->>'portfolio_id',
+    input->>'symbol',
+    (input->>'side')::position_side,
+    input->>'notes',
+    (input->>'opened_at')::TIMESTAMPTZ,
+    (input->>'closed_at')::TIMESTAMPTZ
+  );
+
+  -- Insert orders
+  FOR order_item IN SELECT * FROM JSONB_ARRAY_ELEMENTS(input->'orders')
+  LOOP
+    INSERT INTO orders (
+      trade_id, action, quantity, price, fee, status, executed_at
+    ) VALUES (
+      trade_id,
+      (order_item->>'action')::order_action,
+      (order_item->>'quantity')::NUMERIC,
+      (order_item->>'price')::NUMERIC,
+      (order_item->>'fee')::NUMERIC,
+      (order_item->>'status')::order_status,
+      (order_item->>'executed_at')::TIMESTAMPTZ
+    );
+  END LOOP;
+
+  -- INSERT trade_tags
+  FOR tag_id IN SELECT JSONB_ARRAY_ELEMENTS_TEXT(input->'tag_ids')
+  LOOP
+    INSERT INTO trade_tags (trade_id, tag_id)
+    VALUES (trade_id, tag_id);
+  END LOOP;
+
+  RETURN trade_id;
+END;
 $$;
 
 -- Create trigger function to handle new user creation

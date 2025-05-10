@@ -1,7 +1,12 @@
 import { TypeSupabaseClient } from '@/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { deleteTrade, getTradeSummaries } from '@/lib/queries/trades';
+import {
+  addTrade,
+  AddTradeInput,
+  deleteTrade,
+  getTradeSummaries,
+} from '@/lib/queries/trades';
 import { ReactTableSearchParams } from '@/hooks/use-react-table-state';
 import { getQueryClient } from '@/components/providers/query-provider';
 
@@ -25,17 +30,26 @@ export function useTradeSummaries({
   });
 }
 
+export function useAddTrade({ client }: { client: TypeSupabaseClient }) {
+  return useMutation({
+    mutationFn: async (trade: AddTradeInput) => addTrade(client, trade),
+    onSuccess: () => {
+      getQueryClient().invalidateQueries({
+        queryKey: ['trades'],
+      });
+    },
+    onError: (error) => console.error(error),
+  });
+}
+
 export function useDeleteTrade({ client }: { client: TypeSupabaseClient }) {
   return useMutation({
     mutationFn: (ids: string[] | string) => deleteTrade(client, ids),
     onSuccess: () => {
-      const queryClient = getQueryClient();
-      queryClient.invalidateQueries({
+      getQueryClient().invalidateQueries({
         queryKey: ['trades'],
       });
     },
-    onError: (error) => {
-      console.error(error);
-    },
+    onError: (error) => console.error(error),
   });
 }

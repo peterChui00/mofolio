@@ -1,12 +1,18 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
-import { Database, Tables } from '@/types/supabase';
+import { Database, Enums, Tables } from '@/types/supabase';
 
 type RemoveNullExcept<T, E extends keyof T = never> = {
   [P in keyof T]: P extends E ? T[P] : Exclude<T[P], null>;
 };
 
 export type TypeSupabaseClient = SupabaseClient<Database>;
+
+export type PositionSide = Enums<'position_side'>;
+
+export type OrderAction = Enums<'order_action'>;
+
+export type OrderStatus = Enums<'order_status'>;
 
 type TradeSummaryView = Tables<'trade_summary'>;
 

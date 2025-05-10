@@ -1,14 +1,13 @@
-import Link from 'next/link';
+'use client';
+
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { AddTradeInput } from '@/lib/queries/trades';
 import { useActivePortfolioId } from '@/hooks/use-active-portfolio-id';
-import {
-  EditTradeFormValues,
-  useEditTradeForm,
-} from '@/hooks/use-edit-trade-form';
-import { useAddOrder } from '@/hooks/use-orders';
 import { useSupabase } from '@/hooks/use-supabase';
+import { TradeFormValues, useTradeForm } from '@/hooks/use-trade-form';
+import { useAddTrade } from '@/hooks/use-trades';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -17,67 +16,90 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useStore } from '@/components/providers/app-store-provider';
 import EditTradeForm from '@/components/trades/edit/edit-trade-form';
 
 export default function EditTradeDialog({
-  title,
   ...props
-}: {
-  title?: string;
-} & React.ComponentPropsWithoutRef<typeof Dialog>) {
-  const form = useEditTradeForm();
+}: React.ComponentPropsWithoutRef<typeof Dialog>) {
   const supabase = useSupabase();
+  const open = useStore((state) => state.isEditTradeDialogOpen);
+  const onOpenChange = useStore((state) => state.toggleEditTradeDialog);
+  const setEditTradeDialogTab = useStore(
+    (state) => state.setEditTradeDialogTab
+  );
+  const { title, id } = useStore((state) => state.editTradeDialog);
   const { activePortfolioId } = useActivePortfolioId();
-  const addOrderMutation = useAddOrder({ client: supabase });
-  const isLoading = addOrderMutation.isPending;
 
-  const handleSubmit = (formData: EditTradeFormValues) => {
+  const tradeForm = useTradeForm();
+  const { form } = tradeForm;
+
+  const addTradeMutation = useAddTrade({ client: supabase });
+
+  const isLoading = addTradeMutation.isPending;
+  const isUpdateTradeMode = !!id;
+  const submitText = isUpdateTradeMode ? 'Update' : 'Add';
+  const sumbittingText = isUpdateTradeMode ? 'Updating...' : 'Adding...';
+
+  const handleSubmit = (formData: TradeFormValues) => {
     if (!activePortfolioId) {
       throw new Error('No active portfolio ID found');
     }
 
-    const addOrderInput = {
+    const orders = formData.orders.map((order) => ({
+      ...order,
+      executedAt: order.executedAt.toISOString(),
+    }));
+    const addTradeInput: AddTradeInput = {
       ...formData,
       portfolioId: activePortfolioId,
+      symbol: formData.symbol.toUpperCase(),
+      side: formData.side ?? 'LONG',
+      openedAt: orders[0].executedAt,
+      closedAt:
+        orders.reduce((acc, cur) => acc + cur.quantity, 0) === 0
+          ? orders[orders.length - 1].executedAt
+          : undefined,
+      orders,
     };
-    addOrderMutation.mutate(addOrderInput, {
-      onSuccess: (order) => {
-        toast.success('Trade successfully created', {
-          action: (
-            <Button asChild className="ml-auto h-6 w-20 text-xs">
-              <Link href={'/trades/' + order.trade_id}>View Trade</Link>
-            </Button>
-          ),
-        });
+
+    addTradeMutation.mutate(addTradeInput, {
+      onSuccess: () => {
+        toast.success('Trade successfully created');
         form.reset();
       },
+      onError: () => toast.error('Failed to create trade'),
     });
   };
 
   return (
-    <Dialog {...props}>
-      <DialogContent className="flex max-h-[80dvh] flex-col">
+    <Dialog open={open} onOpenChange={onOpenChange} {...props}>
+      <DialogContent className="flex max-h-[80dvh] flex-col md:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <EditTradeForm
-          className="-mx-6 grid grid-cols-12 gap-4 overflow-y-auto px-6"
-          form={form}
-          onSubmit={form.handleSubmit(handleSubmit)}
+          className="-mx-6 overflow-y-auto px-6"
+          tradeForm={tradeForm}
         />
         <DialogFooter>
+          <Button variant="secondary" onClick={() => form.reset()}>
+            Reset
+          </Button>
           <Button
             type="submit"
-            onClick={form.handleSubmit(handleSubmit)}
+            onClick={form.handleSubmit(handleSubmit, () => {
+              setEditTradeDialogTab('trade');
+            })}
             disabled={isLoading}
           >
             {isLoading ? (
               <>
                 <Loader2 className="animate-spin" />
-                {'Submitting...'}
+                {sumbittingText}
               </>
             ) : (
-              'Submit'
+              submitText
             )}
           </Button>
         </DialogFooter>

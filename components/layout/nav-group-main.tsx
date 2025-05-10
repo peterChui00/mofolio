@@ -21,13 +21,9 @@ export function NavGroupMain({
   const toggleEditTradeDialog = useStore(
     (state) => state.toggleEditTradeDialog
   );
-  const setEditTradeDialogState = useStore(
-    (state) => state.setEditTradeDialogState
-  );
 
   const onCreateTradeButtonClick = () => {
-    setEditTradeDialogState({ title: 'Add trade' });
-    toggleEditTradeDialog(true);
+    toggleEditTradeDialog(true, { title: 'Add trade' });
   };
 
   return (

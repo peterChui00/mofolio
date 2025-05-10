@@ -1,54 +1,64 @@
-import { UseFormReturn } from 'react-hook-form';
+'use client';
 
-import { EditTradeFormValues } from '@/hooks/use-edit-trade-form';
+import { FieldArrayWithId, UseFormReturn } from 'react-hook-form';
+
+import { TradeFormValues, useTradeForm } from '@/hooks/use-trade-form';
 import { Form } from '@/components/ui/form';
-import DateFormField from '@/components/trades/edit/date-form-field';
-import NumberFormField from '@/components/trades/edit/number-form-field';
-import TextFormField from '@/components/trades/edit/text-form-field';
-import TradeActionFormField from '@/components/trades/edit/trade-action-form-field';
-import TradeStatusFormField from '@/components/trades/edit/trade-status-form-field';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useStore } from '@/components/providers/app-store-provider';
+import NotesTabContent from '@/components/trades/edit/notes-tab-content';
+import TradeTabContent from '@/components/trades/edit/trade-tab-content';
+
+const tabsTriggerClassName =
+  'hover:bg-accent hover:text-foreground data-[state=active]:after:bg-primary data-[state=active]:hover:bg-accent relative after:absolute after:inset-x-0 after:bottom-0 after:-mb-1 after:h-0.5 data-[state=active]:border-none data-[state=active]:bg-transparent data-[state=active]:shadow-none dark:data-[state=active]:bg-transparent';
+
+export type FormOrderLayoutProps = {
+  form: UseFormReturn<TradeFormValues>;
+  fields: FieldArrayWithId<TradeFormValues, 'orders', 'id'>[];
+  onAppend: () => void;
+  onRemove: (index: number) => void;
+};
 
 type EditTradeFromProps = {
-  form: UseFormReturn<EditTradeFormValues>;
+  tradeForm: ReturnType<typeof useTradeForm>;
   className?: string;
 } & React.ComponentPropsWithoutRef<'form'>;
 
 export default function EditTradeForm({
-  form,
+  tradeForm,
   className,
   onSubmit,
   ...props
 }: EditTradeFromProps) {
+  const tab = useStore((state) => state.editTradeDialog.tab);
+  const setEditTradeDialogTab = useStore(
+    (state) => state.setEditTradeDialogTab
+  );
+  const { form } = tradeForm;
+
   return (
     <Form {...form}>
       <form onSubmit={onSubmit} className={className} {...props}>
-        <TradeStatusFormField form={form} className="col-span-12" />
-        <TradeActionFormField form={form} className="col-span-6" />
-        <DateFormField form={form} className="col-span-6" />
-        <TextFormField
-          form={form}
-          name="symbol"
-          label="Symbol"
-          className="col-span-6"
-        />
-        <NumberFormField
-          form={form}
-          name="quantity"
-          label="Quantity"
-          className="col-span-6"
-        />
-        <NumberFormField
-          form={form}
-          name="price"
-          label="Price"
-          className="col-span-6"
-        />
-        <NumberFormField
-          form={form}
-          name="fee"
-          label="Fee"
-          className="col-span-6"
-        />
+        <Tabs
+          value={tab}
+          onValueChange={setEditTradeDialogTab}
+          className="gap-4"
+        >
+          <TabsList className="text-foreground h-auto w-full gap-2 rounded-none border-b bg-transparent px-0 py-1">
+            <TabsTrigger value="trade" className={tabsTriggerClassName}>
+              Trade
+            </TabsTrigger>
+            <TabsTrigger value="notes" className={tabsTriggerClassName}>
+              Notes
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="trade" className="space-y-4">
+            <TradeTabContent tradeForm={tradeForm} />
+          </TabsContent>
+          <TabsContent value="notes" className="space-y-4">
+            <NotesTabContent tradeForm={tradeForm} />
+          </TabsContent>
+        </Tabs>
       </form>
     </Form>
   );
