@@ -19,7 +19,7 @@ export default async function MainAppLayout({
       <ActivePortfolioIdProvider />
       <SidebarProvider defaultOpen={defaultOpen} className="h-svh">
         <AppSidebar variant="inset" />
-        <SidebarInset>
+        <SidebarInset className="overflow-hidden">
           <main className="flex size-full flex-1 flex-col">{children}</main>
         </SidebarInset>
         <DialogProvider />
