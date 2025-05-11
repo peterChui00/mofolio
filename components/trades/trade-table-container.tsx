@@ -48,6 +48,7 @@ export default function TradeTableContainer() {
       columnVisibility,
       rowSelection,
       expanded,
+      columnPinning: { right: ['actions'] },
     },
     pageCount: Math.ceil(
       (tradeSummaries?.count || 0) / (pagination.pageSize || 1)

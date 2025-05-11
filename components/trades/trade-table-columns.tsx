@@ -129,6 +129,39 @@ export const tradeTableColumns: ColumnDef<TradeSummary>[] = [
     },
   },
   {
+    accessorKey: 'closed_at',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Closed At" />
+    ),
+    cell: ({ row }) => {
+      return (
+        row.original.closed_at &&
+        new Date(row.original.closed_at).toLocaleDateString()
+      );
+    },
+  },
+  {
+    accessorKey: 'notes',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Notes" />
+    ),
+  },
+  {
+    accessorKey: 'tags',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tags" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex flex-wrap gap-2">
+          {row.original.tags.map((tag: string) => (
+            <Badge key={tag}>{tag}</Badge>
+          ))}
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: 'actions',
     header: () => <span className="sr-only">Actions</span>,
     cell: ({ row }) => <TradeTableActions row={row} />,
