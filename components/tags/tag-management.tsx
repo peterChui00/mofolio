@@ -6,15 +6,14 @@ import { toast } from 'sonner';
 
 import { useSupabase } from '@/hooks/use-supabase';
 import { useDeleteTag, useDeleteTagGroup, useTags } from '@/hooks/use-tags';
-import { useUser } from '@/hooks/use-user';
+import { useUserId } from '@/hooks/use-user-id';
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/components/providers/app-store-provider';
 import TagGroupCard from '@/components/tags/tag-group-card';
 
 export default function TagManagement() {
   const supabase = useSupabase();
-  const user = useUser();
-  const userId = user?.id || '';
+  const userId = useUserId();
   const { data: tagGroupWithTags } = useTags({ client: supabase, userId });
   const toggleEditTagGroupDialog = useStore(
     (state) => state.toggleEditTagGroupDialog

@@ -1,7 +1,7 @@
 import { useSupabase } from '@/hooks/use-supabase';
 import { useTags } from '@/hooks/use-tags';
 import { useTradeForm } from '@/hooks/use-trade-form';
-import { useUser } from '@/hooks/use-user';
+import { useUserId } from '@/hooks/use-user-id';
 import InputFormField from '@/components/trades/edit/input-form-field';
 import TagsFormField from '@/components/trades/edit/tags-form-field';
 
@@ -12,8 +12,7 @@ type NotesTabContentProps = {
 export default function NotesTabContent({ tradeForm }: NotesTabContentProps) {
   const { form } = tradeForm;
   const supabase = useSupabase();
-  const user = useUser();
-  const userId = user?.id || '';
+  const userId = useUserId();
 
   const { data: tagGroupsWithTags, isLoading } = useTags({
     client: supabase,

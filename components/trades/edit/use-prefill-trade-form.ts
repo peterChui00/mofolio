@@ -8,7 +8,7 @@ import {
   initialDefaultTradeFormValues,
   TradeFormValues,
 } from '@/hooks/use-trade-form';
-import { useUser } from '@/hooks/use-user';
+import { useUserId } from '@/hooks/use-user-id';
 
 export function usePrefillTradeForm({
   enable,
@@ -20,8 +20,7 @@ export function usePrefillTradeForm({
   trade: { id?: string; symbol?: string; notes?: string; tags: string[] };
 }) {
   const supabase = useSupabase();
-  const user = useUser();
-  const userId = user?.id || '';
+  const userId = useUserId();
   const [initialValues, setInitialValues] =
     useState<DefaultValues<TradeFormValues> | null>(null);
   const hasPrefilledForm = useRef(false);

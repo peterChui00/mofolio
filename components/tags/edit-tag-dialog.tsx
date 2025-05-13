@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 import { useSupabase } from '@/hooks/use-supabase';
 import { useAddTag, useTags, useUpdateTag } from '@/hooks/use-tags';
-import { useUser } from '@/hooks/use-user';
+import { useUserId } from '@/hooks/use-user-id';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -44,8 +44,7 @@ export default function EditTagDialog({
   ...props
 }: React.ComponentPropsWithoutRef<typeof Dialog>) {
   const supabase = useSupabase();
-  const user = useUser();
-  const userId = user?.id || '';
+  const userId = useUserId();
   const open = useStore((state) => state.isEditTagDialogOpen);
   const onOpenChange = useStore((state) => state.toggleEditTagDialog);
   const { title, tagId, tagName, tagGroupId } = useStore(
