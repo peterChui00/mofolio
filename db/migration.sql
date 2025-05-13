@@ -316,17 +316,9 @@ DECLARE
   order_item JSONB;
   tag_id TEXT;
 BEGIN
-  -- Validate input
+  -- Validate trade input
   IF input->>'side' NOT IN ('LONG', 'SHORT') THEN
     RAISE EXCEPTION 'Invalid side value: %. Must be LONG or SHORT.', input->>'side';
-  END IF;
-
-  IF order_item->>'action' NOT IN ('BUY', 'SELL') THEN
-    RAISE EXCEPTION 'Invalid action value: %. Must be BUY or SELL.', order_item->>'action';
-  END IF;
-
-  IF order_item->>'status' NOT IN ('PENDING', 'FILLED') THEN
-    RAISE EXCEPTION 'Invalid status value: %. Must be PENDING or FILLED.', order_item->>'status';
   END IF;
 
   -- Insert trade
@@ -343,8 +335,19 @@ BEGIN
   );
 
   -- Insert orders
-  FOR order_item IN SELECT * FROM JSONB_ARRAY_ELEMENTS(input->'orders')
+  FOR order_item IN 
+    SELECT * FROM JSONB_ARRAY_ELEMENTS(input->'orders') 
   LOOP
+    -- Validate order input
+    IF order_item->>'action' NOT IN ('BUY', 'SELL') THEN
+      RAISE EXCEPTION 'Invalid order action: %. Must be BUY or SELL.', order_item->>'action';
+    END IF;
+
+    IF order_item->>'status' NOT IN ('PENDING', 'FILLED') THEN
+      RAISE EXCEPTION 'Invalid order status: %. Must be PENDING or FILLED.', order_item->>'status';
+    END IF;
+
+    -- Insert order
     INSERT INTO orders (
       trade_id, action, quantity, price, fee, status, executed_at
     ) VALUES (
@@ -359,13 +362,88 @@ BEGIN
   END LOOP;
 
   -- INSERT trade_tags
-  FOR tag_id IN SELECT JSONB_ARRAY_ELEMENTS_TEXT(input->'tag_ids')
-  LOOP
-    INSERT INTO trade_tags (trade_id, tag_id)
-    VALUES (trade_id, tag_id);
-  END LOOP;
+  IF input ? 'tag_ids' AND jsonb_typeof(input->'tag_ids') = 'array' THEN
+    FOR tag_id IN SELECT JSONB_ARRAY_ELEMENTS_TEXT(input->'tag_ids') LOOP
+      INSERT INTO trade_tags (trade_id, tag_id)
+      VALUES (trade_id, tag_id)
+      ON CONFLICT DO NOTHING;
+    END LOOP;
+  END IF;
 
   RETURN trade_id;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION update_trade(
+  input JSONB
+)
+RETURNS VOID LANGUAGE plpgsql AS $$
+DECLARE
+  v_trade_id TEXT := input->>'id';
+  order_item JSONB;
+  tag_id TEXT;
+BEGIN
+  -- Check if trade exists
+  IF NOT EXISTS (SELECT 1 FROM trades WHERE id = v_trade_id) THEN
+    RAISE EXCEPTION 'Trade with id % does not exist.', v_trade_id;
+  END IF;
+
+  -- Validate side
+  IF input->>'side' NOT IN ('LONG', 'SHORT') THEN
+    RAISE EXCEPTION 'Invalid side value: %. Must be LONG or SHORT.', input->>'side';
+  END IF;
+
+  -- Update trade
+  UPDATE trades SET
+    portfolio_id = input->>'portfolio_id',
+    symbol = input->>'symbol',
+    side = (input->>'side')::position_side,
+    notes = input->>'notes',
+    opened_at = (input->>'opened_at')::TIMESTAMPTZ,
+    closed_at = (input->>'closed_at')::TIMESTAMPTZ
+  WHERE id = v_trade_id;
+
+  -- Reset orders
+  DELETE FROM orders WHERE trade_id = v_trade_id;
+
+  -- Insert orders
+  FOR order_item IN 
+    SELECT * FROM JSONB_ARRAY_ELEMENTS(input->'orders') 
+  LOOP
+    -- Validate order input
+    IF order_item->>'action' NOT IN ('BUY', 'SELL') THEN
+      RAISE EXCEPTION 'Invalid order action: %. Must be BUY or SELL.', order_item->>'action';
+    END IF;
+
+    IF order_item->>'status' NOT IN ('PENDING', 'FILLED') THEN
+      RAISE EXCEPTION 'Invalid order status: %. Must be PENDING or FILLED.', order_item->>'status';
+    END IF;
+
+    -- Insert orders
+    INSERT INTO orders (
+      trade_id, action, quantity, price, fee, status, executed_at
+    ) VALUES (
+      v_trade_id,
+      (order_item->>'action')::order_action,
+      (order_item->>'quantity')::NUMERIC,
+      (order_item->>'price')::NUMERIC,
+      (order_item->>'fee')::NUMERIC,
+      (order_item->>'status')::order_status,
+      (order_item->>'executed_at')::TIMESTAMPTZ
+    );
+  END LOOP;
+
+  -- Reset trade_tags
+  DELETE FROM trade_tags WHERE trade_id = v_trade_id;
+
+-- INSERT trade_tags
+  IF input ? 'tag_ids' AND jsonb_typeof(input->'tag_ids') = 'array' THEN
+    FOR tag_id IN SELECT JSONB_ARRAY_ELEMENTS_TEXT(input->'tag_ids') LOOP
+      INSERT INTO trade_tags (trade_id, tag_id)
+      VALUES (v_trade_id, tag_id)
+      ON CONFLICT DO NOTHING;
+    END LOOP;
+  END IF;
 END;
 $$;
 

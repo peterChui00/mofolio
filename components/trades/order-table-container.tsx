@@ -21,7 +21,7 @@ export default function OrderTableContainer({ tradeId }: { tradeId: string }) {
   });
 
   const table = useReactTable({
-    data: orders?.data || [],
+    data: orders || [],
     columns: orderTableColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

@@ -3,11 +3,11 @@
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { AddTradeInput } from '@/lib/queries/trades';
+import { EditTradeInput } from '@/lib/queries/trades';
 import { useActivePortfolioId } from '@/hooks/use-active-portfolio-id';
 import { useSupabase } from '@/hooks/use-supabase';
 import { TradeFormValues, useTradeForm } from '@/hooks/use-trade-form';
-import { useAddTrade } from '@/hooks/use-trades';
+import { useAddTrade, useUpdateTrade } from '@/hooks/use-trades';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { useStore } from '@/components/providers/app-store-provider';
 import EditTradeForm from '@/components/trades/edit/edit-trade-form';
+import { usePrefillTradeForm } from '@/components/trades/edit/use-prefill-trade-form';
 
 export default function EditTradeDialog({
   ...props
@@ -28,18 +29,36 @@ export default function EditTradeDialog({
   const setEditTradeDialogTab = useStore(
     (state) => state.setEditTradeDialogTab
   );
-  const { title, id } = useStore((state) => state.editTradeDialog);
+  const {
+    title,
+    id,
+    symbol,
+    notes,
+    tags = [],
+  } = useStore((state) => state.editTradeDialog);
+  const isUpdateTradeMode = !!id;
   const { activePortfolioId } = useActivePortfolioId();
 
   const tradeForm = useTradeForm();
   const { form } = tradeForm;
 
-  const addTradeMutation = useAddTrade({ client: supabase });
+  const {
+    resetToInitial,
+    updateInitial,
+    isLoading: isPrefilling,
+  } = usePrefillTradeForm({
+    enable: isUpdateTradeMode,
+    trade: { id, symbol, notes, tags },
+    form,
+  });
 
-  const isLoading = addTradeMutation.isPending;
-  const isUpdateTradeMode = !!id;
+  const addTradeMutation = useAddTrade({ client: supabase });
+  const updateTradeMutation = useUpdateTrade({ client: supabase });
+
+  const isSubmitting =
+    addTradeMutation.isPending || updateTradeMutation.isPending;
   const submitText = isUpdateTradeMode ? 'Update' : 'Add';
-  const sumbittingText = isUpdateTradeMode ? 'Updating...' : 'Adding...';
+  const submittingText = isUpdateTradeMode ? 'Updating...' : 'Adding...';
 
   const handleSubmit = (formData: TradeFormValues) => {
     if (!activePortfolioId) {
@@ -50,7 +69,8 @@ export default function EditTradeDialog({
       ...order,
       executedAt: order.executedAt.toISOString(),
     }));
-    const addTradeInput: AddTradeInput = {
+
+    const editTradeInput: EditTradeInput = {
       ...formData,
       portfolioId: activePortfolioId,
       symbol: formData.symbol.toUpperCase(),
@@ -63,10 +83,23 @@ export default function EditTradeDialog({
       orders,
     };
 
-    addTradeMutation.mutate(addTradeInput, {
+    if (isUpdateTradeMode) {
+      return updateTradeMutation.mutate(
+        { id, ...editTradeInput },
+        {
+          onSuccess: () => {
+            toast.success('Trade successfully updated');
+            updateInitial(form.getValues());
+          },
+          onError: () => toast.error('Failed to update trade'),
+        }
+      );
+    }
+
+    addTradeMutation.mutate(editTradeInput, {
       onSuccess: () => {
         toast.success('Trade successfully created');
-        form.reset();
+        resetToInitial();
       },
       onError: () => toast.error('Failed to create trade'),
     });
@@ -81,9 +114,14 @@ export default function EditTradeDialog({
         <EditTradeForm
           className="-mx-6 overflow-y-auto px-6"
           tradeForm={tradeForm}
+          isPrefilling={isPrefilling}
         />
         <DialogFooter>
-          <Button variant="secondary" onClick={() => form.reset()}>
+          <Button
+            variant="secondary"
+            onClick={resetToInitial}
+            disabled={isSubmitting || isPrefilling}
+          >
             Reset
           </Button>
           <Button
@@ -91,12 +129,12 @@ export default function EditTradeDialog({
             onClick={form.handleSubmit(handleSubmit, () => {
               setEditTradeDialogTab('trade');
             })}
-            disabled={isLoading}
+            disabled={isSubmitting || isPrefilling}
           >
-            {isLoading ? (
+            {isSubmitting ? (
               <>
                 <Loader2 className="animate-spin" />
-                {sumbittingText}
+                {submittingText}
               </>
             ) : (
               submitText

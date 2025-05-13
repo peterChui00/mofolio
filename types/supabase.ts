@@ -347,6 +347,10 @@ export type Database = {
         Args: { size: number; alphabet: string; mask: number; step: number };
         Returns: string;
       };
+      update_trade: {
+        Args: { input: Json };
+        Returns: undefined;
+      };
     };
     Enums: {
       order_action: 'BUY' | 'SELL';

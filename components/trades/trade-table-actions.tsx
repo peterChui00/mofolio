@@ -22,10 +22,23 @@ export default function TradeTableActions({ row }: { row: Row<TradeSummary> }) {
   const router = useRouter();
   const supabase = useSupabase();
   const toggleConfirmDialog = useStore((state) => state.toggleConfirmDialog);
+  const toggleEditTradeDialog = useStore(
+    (state) => state.toggleEditTradeDialog
+  );
   const deleteTradeMutation = useDeleteTrade({ client: supabase });
 
   const openDetailPage = () => {
     router.push(`/trades/${row.original.id}`);
+  };
+
+  const editTrade = () => {
+    toggleEditTradeDialog(true, {
+      title: 'Edit trade',
+      id: row.original.id,
+      symbol: row.original.symbol,
+      notes: row.original.notes ?? undefined,
+      tags: row.original.tags,
+    });
   };
 
   const deleteTrade = () => {
@@ -61,7 +74,7 @@ export default function TradeTableActions({ row }: { row: Row<TradeSummary> }) {
           <InfoIcon />
           Detail
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={editTrade}>
           <PenLineIcon />
           Edit
         </DropdownMenuItem>

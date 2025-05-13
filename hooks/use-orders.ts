@@ -12,7 +12,7 @@ export function useOrders({
 }) {
   return useQuery({
     queryKey: ['orders', tradeId],
-    queryFn: () => getOrders(client, tradeId),
+    queryFn: () => getOrders(client, tradeId).then((res) => res.data),
   });
 }
 

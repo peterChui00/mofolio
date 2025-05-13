@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { DefaultValues, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 export const orderFormSchema = z.object({
@@ -61,18 +61,22 @@ const calculatePositionSide = (orders: TradeFormValues['orders']) => {
   return isNaN(qty) || qty === 0 ? null : qty > 0 ? 'LONG' : 'SHORT';
 };
 
+export const initialDefaultTradeFormValues: DefaultValues<TradeFormValues> = {
+  symbol: '',
+  notes: '',
+  orders: [
+    {
+      action: 'BUY',
+      status: 'FILLED',
+    },
+  ],
+};
+
 export function useTradeForm(defaultValues?: TradeFormValues) {
   const form = useForm<TradeFormValues>({
     resolver: zodResolver(tradeFormSchema),
     defaultValues: {
-      symbol: '',
-      notes: '',
-      orders: [
-        {
-          action: 'BUY',
-          status: 'FILLED',
-        },
-      ],
+      ...initialDefaultTradeFormValues,
       ...defaultValues,
     },
   });

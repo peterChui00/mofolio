@@ -3,9 +3,10 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 
 import {
   addTrade,
-  AddTradeInput,
   deleteTrade,
+  EditTradeInput,
   getTradeSummaries,
+  updateTrade,
 } from '@/lib/queries/trades';
 import { ReactTableSearchParams } from '@/hooks/use-react-table-state';
 import { getQueryClient } from '@/components/providers/query-provider';
@@ -32,7 +33,19 @@ export function useTradeSummaries({
 
 export function useAddTrade({ client }: { client: TypeSupabaseClient }) {
   return useMutation({
-    mutationFn: async (trade: AddTradeInput) => addTrade(client, trade),
+    mutationFn: async (trade: EditTradeInput) => addTrade(client, trade),
+    onSuccess: () => {
+      getQueryClient().invalidateQueries({
+        queryKey: ['trades'],
+      });
+    },
+    onError: (error) => console.error(error),
+  });
+}
+
+export function useUpdateTrade({ client }: { client: TypeSupabaseClient }) {
+  return useMutation({
+    mutationFn: async (trade: EditTradeInput) => updateTrade(client, trade),
     onSuccess: () => {
       getQueryClient().invalidateQueries({
         queryKey: ['trades'],

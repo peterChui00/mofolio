@@ -53,6 +53,7 @@ export const getTradeSummaries = async (
 };
 
 export type OrderInput = {
+  id?: string;
   action: OrderAction;
   quantity: number;
   price: number;
@@ -61,7 +62,8 @@ export type OrderInput = {
   executedAt?: string | null;
 };
 
-export type AddTradeInput = {
+export type EditTradeInput = {
+  id?: string;
   portfolioId: string;
   symbol: string;
   side: PositionSide;
@@ -74,7 +76,7 @@ export type AddTradeInput = {
 
 export const addTrade = async (
   client: TypeSupabaseClient,
-  trade: AddTradeInput
+  trade: EditTradeInput
 ) => {
   const input = {
     portfolio_id: trade.portfolioId,
@@ -94,6 +96,31 @@ export const addTrade = async (
     })),
   };
   return client.rpc('add_trade', { input }).throwOnError();
+};
+
+export const updateTrade = async (
+  client: TypeSupabaseClient,
+  trade: EditTradeInput
+) => {
+  const input = {
+    portfolio_id: trade.portfolioId,
+    id: trade.id,
+    symbol: trade.symbol,
+    side: trade.side,
+    notes: trade.notes,
+    opened_at: trade.openedAt,
+    closed_at: trade.closedAt,
+    tag_ids: trade.tagIds,
+    orders: trade.orders.map((order) => ({
+      action: order.action,
+      quantity: order.quantity,
+      price: order.price,
+      fee: order.fee,
+      status: order.status,
+      executed_at: order.executedAt,
+    })),
+  };
+  return client.rpc('update_trade', { input }).throwOnError();
 };
 
 export const deleteTrade = async (

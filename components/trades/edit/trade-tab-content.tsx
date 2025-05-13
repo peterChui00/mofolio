@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTradeForm } from '@/hooks/use-trade-form';
+import { Skeleton } from '@/components/ui/skeleton';
 import FormOrderCard from '@/components/trades/edit/form-order-card';
 import FormOrderTable from '@/components/trades/edit/form-order-table';
 import InputFormField from '@/components/trades/edit/input-form-field';
@@ -11,9 +12,13 @@ import PositionSideFormField from '@/components/trades/edit/position-side-form-f
 
 type FormOrderLayoutProps = {
   tradeForm: ReturnType<typeof useTradeForm>;
+  isPrefilling?: boolean;
 };
 
-export default function TradeTabContent({ tradeForm }: FormOrderLayoutProps) {
+export default function TradeTabContent({
+  tradeForm,
+  isPrefilling,
+}: FormOrderLayoutProps) {
   const isMobile = useIsMobile();
   const { form, fieldArray } = tradeForm;
   const { fields, append, remove } = fieldArray;
@@ -21,6 +26,7 @@ export default function TradeTabContent({ tradeForm }: FormOrderLayoutProps) {
   const defaultField = useRef(fields[0]);
 
   useEffect(() => {
+    // Set the first field as default field
     defaultField.current = fields[0];
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -72,7 +78,13 @@ export default function TradeTabContent({ tradeForm }: FormOrderLayoutProps) {
         />
       </div>
 
-      {isMobile ? (
+      {isPrefilling ? (
+        <div className="flex flex-col gap-2">
+          {[...Array(3)].map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full rounded-md" />
+          ))}
+        </div>
+      ) : isMobile ? (
         <FormOrderCard {...formOrderLayoutProps} />
       ) : (
         <FormOrderTable {...formOrderLayoutProps} />

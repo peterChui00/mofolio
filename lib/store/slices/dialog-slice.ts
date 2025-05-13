@@ -1,4 +1,3 @@
-import { Order } from '@/types';
 import { VariantProps } from 'class-variance-authority';
 import { StateCreator } from 'zustand';
 
@@ -26,7 +25,7 @@ export type DialogSliceState = {
     id?: string;
     symbol?: string;
     notes?: string;
-    orders?: Order[];
+    tags?: string[];
   };
 
   isEditTagGroupDialogOpen: boolean;
@@ -88,6 +87,8 @@ export const initialDialogState: DialogSliceState = {
     tab: 'trade',
     id: undefined,
     symbol: undefined,
+    notes: undefined,
+    tags: undefined,
   },
   isEditTagGroupDialogOpen: false,
   editTagGroupDialog: {

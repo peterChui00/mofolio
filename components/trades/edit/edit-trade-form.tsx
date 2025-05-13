@@ -22,11 +22,13 @@ export type FormOrderLayoutProps = {
 type EditTradeFromProps = {
   tradeForm: ReturnType<typeof useTradeForm>;
   className?: string;
+  isPrefilling?: boolean;
 } & React.ComponentPropsWithoutRef<'form'>;
 
 export default function EditTradeForm({
   tradeForm,
   className,
+  isPrefilling,
   onSubmit,
   ...props
 }: EditTradeFromProps) {
@@ -53,7 +55,10 @@ export default function EditTradeForm({
             </TabsTrigger>
           </TabsList>
           <TabsContent value="trade" className="space-y-4">
-            <TradeTabContent tradeForm={tradeForm} />
+            <TradeTabContent
+              tradeForm={tradeForm}
+              isPrefilling={isPrefilling}
+            />
           </TabsContent>
           <TabsContent value="notes" className="space-y-4">
             <NotesTabContent tradeForm={tradeForm} />
