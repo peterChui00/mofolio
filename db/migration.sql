@@ -10,7 +10,7 @@ CREATE TABLE tag_groups (
   id TEXT DEFAULT nanoid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT unique_tag_group_name UNIQUE (user_id, name)
 );
 
@@ -19,7 +19,7 @@ CREATE TABLE tags (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   group_id TEXT REFERENCES tag_groups(id) ON DELETE SET NULL,
   name TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT unique_tag_name UNIQUE (user_id, name)
 );
 
@@ -32,7 +32,7 @@ CREATE TABLE portfolios (
      LENGTH(base_currency) = 3
     AND base_currency ~ '^[A-Z]{3}$'
   ),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Trade
@@ -42,9 +42,9 @@ CREATE TABLE trades (
   symbol TEXT NOT NULL,
   side position_side NOT NULL,
   notes TEXT,
-  opened_at TIMESTAMP WITH TIME ZONE,
-  closed_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  opened_at TIMESTAMPTZ,
+  closed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE trade_tags (
@@ -62,24 +62,42 @@ CREATE TABLE orders (
   price NUMERIC NOT NULL,
   fee NUMERIC NOT NULL,
   status order_status NOT NULL,
-  executed_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  executed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Journal Entry
+CREATE TABLE journal_folders (
+  id TEXT DEFAULT nanoid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE journal_entries (
   id TEXT DEFAULT nanoid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  portfolio_id TEXT references portfolios(id) ON DELETE SET NULL,
+  folder_id TEXT references journal_folders(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
-  content TEXT,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  content JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE journal_entry_tags (
   journal_entry_id TEXT REFERENCES journal_entries(id) ON DELETE CASCADE,
   tag_id TEXT REFERENCES tags(id) ON DELETE CASCADE,
   PRIMARY KEY (journal_entry_id, tag_id)
+);
+
+CREATE TABLE journal_templates (
+  id TEXT DEFAULT nanoid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  content JSONB NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT unique_journal_template_name UNIQUE (user_id, name)
 );
 
 CREATE OR REPLACE VIEW public.trade_summary WITH ( security_invoker = ON
@@ -474,20 +492,15 @@ EXECUTE PROCEDURE public.handle_new_user();
 
 -- Enable Row Level Security
 ALTER TABLE tag_groups ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE portfolios ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE trades ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE trade_tags ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
-
+ALTER TABLE journal_folders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
-
 ALTER TABLE journal_entry_tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE journal_templates ENABLE ROW LEVEL SECURITY;
 
 -- Tag Group Policies
 CREATE POLICY "Users can view their own tag groups"
@@ -715,31 +728,41 @@ USING (
   )
 );
 
+-- Journal Folder Policies
+CREATE POLICY "Users can view their own journal folders" ON journal_folders
+    FOR SELECT TO authenticated
+        USING (user_id = auth.uid ());
+
+CREATE POLICY "Users can create their own journal folders" ON journal_folders
+    FOR INSERT TO authenticated
+        WITH CHECK (user_id = auth.uid ());
+
+CREATE POLICY "Users can update their own journal folders" ON journal_folders
+    FOR UPDATE TO authenticated
+        USING (user_id = auth.uid ())
+        WITH CHECK (user_id = auth.uid ());
+
+CREATE POLICY "Users can delete their own journal folders" ON journal_folders
+    FOR DELETE TO authenticated
+        USING (user_id = auth.uid ());
+
 -- Journal Entry Policies
-CREATE POLICY "Users can view their own journal entries"
-ON journal_entries
-FOR SELECT
-TO authenticated
-USING (user_id = auth.uid());
+CREATE POLICY "Users can view their own journal entries" ON journal_entries
+    FOR SELECT TO authenticated
+        USING (user_id = auth.uid ());
 
-CREATE POLICY "Users can create their own journal entries"
-ON journal_entries
-FOR INSERT
-TO authenticated
-WITH CHECK (user_id = auth.uid());
+CREATE POLICY "Users can insert their own journal entries" ON journal_entries
+    FOR INSERT TO authenticated
+        WITH CHECK (user_id = auth.uid ());
 
-CREATE POLICY "Users can update their own journal entries"
-ON journal_entries
-FOR UPDATE
-TO authenticated
-USING (user_id = auth.uid())
-WITH CHECK (user_id = auth.uid());
+CREATE POLICY "Users can update their own journal entries" ON journal_entries
+    FOR UPDATE TO authenticated
+        USING (user_id = auth.uid ())
+        WITH CHECK (user_id = auth.uid ());
 
-CREATE POLICY "Users can delete their own journal entries"
-ON journal_entries
-FOR DELETE
-TO authenticated
-USING (user_id = auth.uid());
+CREATE POLICY "Users can delete their own journal entries" ON journal_entries
+    FOR DELETE TO authenticated
+        USING (user_id = auth.uid ());
 
 -- Journal Entry Tag Policies
 CREATE POLICY "Users can view their own journal entry tags"
@@ -747,39 +770,69 @@ ON journal_entry_tags
 FOR SELECT
 TO authenticated
 USING (
-  journal_entry_id IN (
-    SELECT id FROM journal_entries WHERE user_id = auth.uid()
+  EXISTS (
+    SELECT 1 FROM journal_entries
+    WHERE journal_entries.id = journal_entry_tags.journal_entry_id
+      AND journal_entries.user_id = auth.uid()
   )
   AND
-  tag_id IN (
-    SELECT id FROM tags WHERE user_id = auth.uid()
+  EXISTS (
+    SELECT 1 FROM tags
+    WHERE tags.id = journal_entry_tags.tag_id
+      AND tags.user_id = auth.uid()
   )
 );
 
-CREATE POLICY "Users can tag their own journal entries"
+CREATE POLICY "Users can insert tags for their own entries"
 ON journal_entry_tags
 FOR INSERT
 TO authenticated
 WITH CHECK (
-  journal_entry_id IN (
-    SELECT id FROM journal_entries WHERE user_id = auth.uid()
+  EXISTS (
+    SELECT 1 FROM journal_entries
+    WHERE journal_entries.id = journal_entry_tags.journal_entry_id
+      AND journal_entries.user_id = auth.uid()
   )
   AND
-  tag_id IN (
-    SELECT id FROM tags WHERE user_id = auth.uid()
+  EXISTS (
+    SELECT 1 FROM tags
+    WHERE tags.id = journal_entry_tags.tag_id
+      AND tags.user_id = auth.uid()
   )
 );
 
-CREATE POLICY "Users can remove tags from their own journal entries"
+CREATE POLICY "Users can delete tags for their own entries"
 ON journal_entry_tags
 FOR DELETE
 TO authenticated
 USING (
-  journal_entry_id IN (
-    SELECT id FROM journal_entries WHERE user_id = auth.uid()
+  EXISTS (
+    SELECT 1 FROM journal_entries
+    WHERE journal_entries.id = journal_entry_tags.journal_entry_id
+      AND journal_entries.user_id = auth.uid()
   )
   AND
-  tag_id IN (
-    SELECT id FROM tags WHERE user_id = auth.uid()
+  EXISTS (
+    SELECT 1 FROM tags
+    WHERE tags.id = journal_entry_tags.tag_id
+      AND tags.user_id = auth.uid()
   )
 );
+
+-- Journal Template Policies
+CREATE POLICY "Users can view their own journal templates" ON journal_templates
+    FOR SELECT TO authenticated
+        USING (user_id = auth.uid ());
+
+CREATE POLICY "Users can insert their own journal templates" ON journal_templates
+    FOR INSERT TO authenticated
+        WITH CHECK (user_id = auth.uid ());
+
+CREATE POLICY "Users can update their own journal templates" ON journal_templates
+    FOR UPDATE TO authenticated
+        USING (user_id = auth.uid ())
+        WITH CHECK (user_id = auth.uid ());
+
+CREATE POLICY "Users can delete their own journal templates" ON journal_templates
+    FOR DELETE TO authenticated
+        USING (user_id = auth.uid ());
