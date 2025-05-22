@@ -1,5 +1,5 @@
 import { VariantProps } from 'class-variance-authority';
-import { Loader2 } from 'lucide-react';
+import { Loader2Icon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import {
@@ -57,7 +57,7 @@ export function ConfirmationDialog({
           >
             {isLoading ? (
               <>
-                <Loader2 className="animate-spin" />
+                <Loader2Icon className="animate-spin" />
                 {confirmingText}
               </>
             ) : (

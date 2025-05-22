@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
+import { Loader2Icon } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { EditTradeInput } from '@/lib/queries/trades';
@@ -133,7 +133,7 @@ export default function EditTradeDialog({
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="animate-spin" />
+                <Loader2Icon className="animate-spin" />
                 {submittingText}
               </>
             ) : (

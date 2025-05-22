@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
+import { Loader2Icon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -68,7 +68,7 @@ export default function EditTagGroupDialog({
     addTagGroupMutation.isPending || updateTagGroupMutation.isPending;
   const isUpdateTagGroupMode = tagGroupId && tagGroupName;
   const submitText = isUpdateTagGroupMode ? 'Update' : 'Add';
-  const sumbittingText = isUpdateTagGroupMode ? 'Updating...' : 'Adding...';
+  const submittingText = isUpdateTagGroupMode ? 'Updating...' : 'Adding...';
 
   const handleSubmit = (formData: TagGroupFormValues) => {
     if (isUpdateTagGroupMode) {
@@ -131,8 +131,8 @@ export default function EditTagGroupDialog({
           >
             {isLoading ? (
               <>
-                <Loader2 className="animate-spin" />
-                {sumbittingText}
+                <Loader2Icon className="animate-spin" />
+                {submittingText}
               </>
             ) : (
               submitText
