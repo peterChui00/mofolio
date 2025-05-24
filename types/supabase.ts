@@ -36,30 +36,54 @@ export type Database = {
     Tables: {
       journal_entries: {
         Row: {
-          content: string | null;
-          created_at: string | null;
+          content: Json | null;
+          created_at: string;
+          date: string | null;
+          folder_id: string | null;
           id: string;
+          portfolio_id: string | null;
           title: string;
-          updated_at: string | null;
+          updated_at: string;
           user_id: string;
         };
         Insert: {
-          content?: string | null;
-          created_at?: string | null;
+          content?: Json | null;
+          created_at?: string;
+          date?: string | null;
+          folder_id?: string | null;
           id?: string;
+          portfolio_id?: string | null;
           title: string;
-          updated_at?: string | null;
+          updated_at?: string;
           user_id: string;
         };
         Update: {
-          content?: string | null;
-          created_at?: string | null;
+          content?: Json | null;
+          created_at?: string;
+          date?: string | null;
+          folder_id?: string | null;
           id?: string;
+          portfolio_id?: string | null;
           title?: string;
-          updated_at?: string | null;
+          updated_at?: string;
           user_id?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'journal_entries_folder_id_fkey';
+            columns: ['folder_id'];
+            isOneToOne: false;
+            referencedRelation: 'journal_folders';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'journal_entries_portfolio_id_fkey';
+            columns: ['portfolio_id'];
+            isOneToOne: false;
+            referencedRelation: 'portfolios';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       journal_entry_tags: {
         Row: {
@@ -91,10 +115,55 @@ export type Database = {
           },
         ];
       };
+      journal_folders: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      journal_templates: {
+        Row: {
+          content: Json;
+          created_at: string;
+          id: string;
+          name: string;
+          user_id: string;
+        };
+        Insert: {
+          content: Json;
+          created_at?: string;
+          id?: string;
+          name: string;
+          user_id: string;
+        };
+        Update: {
+          content?: Json;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       orders: {
         Row: {
           action: Database['public']['Enums']['order_action'];
-          created_at: string | null;
+          created_at: string;
           executed_at: string | null;
           fee: number;
           id: string;
@@ -105,7 +174,7 @@ export type Database = {
         };
         Insert: {
           action: Database['public']['Enums']['order_action'];
-          created_at?: string | null;
+          created_at?: string;
           executed_at?: string | null;
           fee: number;
           id?: string;
@@ -116,7 +185,7 @@ export type Database = {
         };
         Update: {
           action?: Database['public']['Enums']['order_action'];
-          created_at?: string | null;
+          created_at?: string;
           executed_at?: string | null;
           fee?: number;
           id?: string;
@@ -145,21 +214,21 @@ export type Database = {
       portfolios: {
         Row: {
           base_currency: string;
-          created_at: string | null;
+          created_at: string;
           id: string;
           name: string;
           user_id: string;
         };
         Insert: {
           base_currency?: string;
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
           name: string;
           user_id: string;
         };
         Update: {
           base_currency?: string;
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
           name?: string;
           user_id?: string;
@@ -168,19 +237,19 @@ export type Database = {
       };
       tag_groups: {
         Row: {
-          created_at: string | null;
+          created_at: string;
           id: string;
           name: string;
           user_id: string;
         };
         Insert: {
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
           name: string;
           user_id: string;
         };
         Update: {
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
           name?: string;
           user_id?: string;
@@ -189,21 +258,21 @@ export type Database = {
       };
       tags: {
         Row: {
-          created_at: string | null;
+          created_at: string;
           group_id: string | null;
           id: string;
           name: string;
           user_id: string;
         };
         Insert: {
-          created_at?: string | null;
+          created_at?: string;
           group_id?: string | null;
           id?: string;
           name: string;
           user_id: string;
         };
         Update: {
-          created_at?: string | null;
+          created_at?: string;
           group_id?: string | null;
           id?: string;
           name?: string;
@@ -259,7 +328,7 @@ export type Database = {
       trades: {
         Row: {
           closed_at: string | null;
-          created_at: string | null;
+          created_at: string;
           id: string;
           notes: string | null;
           opened_at: string | null;
@@ -269,7 +338,7 @@ export type Database = {
         };
         Insert: {
           closed_at?: string | null;
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
           notes?: string | null;
           opened_at?: string | null;
@@ -279,7 +348,7 @@ export type Database = {
         };
         Update: {
           closed_at?: string | null;
-          created_at?: string | null;
+          created_at?: string;
           id?: string;
           notes?: string | null;
           opened_at?: string | null;
@@ -330,6 +399,16 @@ export type Database = {
       add_trade: {
         Args: { input: Json };
         Returns: string;
+      };
+      get_journal: {
+        Args: { uid: string };
+        Returns: {
+          folder_id: string;
+          folder_name: string;
+          entry_id: string;
+          entry_title: string;
+          created_at: string;
+        }[];
       };
       get_tags_grouped: {
         Args: { uid: string };

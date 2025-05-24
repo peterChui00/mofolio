@@ -42,6 +42,13 @@ export type DialogSliceState = {
     tagName?: string;
     tagGroupId?: string;
   };
+
+  isEditJournalEntryDialogOpen: boolean;
+  editJournalEntryDialog: {
+    title: string;
+    id?: string;
+    entryTitle?: string;
+  };
 };
 
 export type DialogSliceActions = {
@@ -63,6 +70,10 @@ export type DialogSliceActions = {
   toggleEditTagDialog(
     open?: boolean,
     dialogState?: DialogSliceState['editTagDialog']
+  ): void;
+  toggleEditJournalEntryDialog(
+    open?: boolean,
+    dialogState?: DialogSliceState['editJournalEntryDialog']
   ): void;
 };
 
@@ -102,6 +113,12 @@ export const initialDialogState: DialogSliceState = {
     tagId: undefined,
     tagName: undefined,
     tagGroupId: undefined,
+  },
+  isEditJournalEntryDialogOpen: false,
+  editJournalEntryDialog: {
+    title: 'Add journal entry',
+    id: undefined,
+    entryTitle: undefined,
   },
 };
 
@@ -169,6 +186,17 @@ export const createDialogSlice: StateCreator<Store, [], [], DialogSlice> = (
       editTagDialog: {
         ...state.editTagDialog,
         ...(open && initialDialogState.editTagDialog),
+        ...dialogState,
+      },
+    }));
+  },
+
+  toggleEditJournalEntryDialog: (open, dialogState) => {
+    set((state) => ({
+      isEditJournalEntryDialogOpen: open ?? !state.isEditJournalEntryDialogOpen,
+      editJournalEntryDialog: {
+        ...state.editJournalEntryDialog,
+        ...(open && initialDialogState.editJournalEntryDialog),
         ...dialogState,
       },
     }));

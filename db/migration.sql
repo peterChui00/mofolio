@@ -80,6 +80,7 @@ CREATE TABLE journal_entries (
   portfolio_id TEXT references portfolios(id) ON DELETE SET NULL,
   folder_id TEXT references journal_folders(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
+  date DATE,
   content JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -328,6 +329,7 @@ CREATE OR REPLACE FUNCTION add_trade(
 )
 RETURNS TEXT
 LANGUAGE plpgsql
+SET search_path = public
 AS $$
 DECLARE
   trade_id TEXT := nanoid();
@@ -395,7 +397,10 @@ $$;
 CREATE OR REPLACE FUNCTION update_trade(
   input JSONB
 )
-RETURNS VOID LANGUAGE plpgsql AS $$
+RETURNS VOID
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
 DECLARE
   v_trade_id TEXT := input->>'id';
   order_item JSONB;
@@ -464,6 +469,67 @@ BEGIN
   END IF;
 END;
 $$;
+
+CREATE OR REPLACE FUNCTION get_journal(uid UUID)
+RETURNS TABLE (
+    folder_id TEXT,
+    folder_name TEXT,
+    -- parent_folder_id TEXT,
+    entry_id TEXT,
+    entry_title TEXT,
+    created_at TIMESTAMPTZ
+)
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+
+  -- Entries inside folders
+  SELECT
+    f.id AS folder_id,
+    f.name AS folder_name,
+    -- f.parent_id AS parent_folder_id,
+    e.id AS entry_id,
+    e.title AS entry_title,
+    e.created_at
+  FROM journal_folders f
+  LEFT JOIN journal_entries e ON f.id = e.folder_id
+  WHERE f.user_id = uid
+
+  UNION ALL
+
+  -- Uncategorized (folder is NULL)
+  SELECT
+    NULL AS folder_id,
+    '_uncategorized' AS folder_name,
+    -- NULL AS parent_folder_id,
+    e.id AS entry_id,
+    e.title AS entry_title,
+    e.created_at
+  FROM journal_entries e
+  WHERE e.folder_id IS NULL AND e.user_id = uid;
+
+END;
+$$;
+
+-- Trigger function to update updated_at column
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+-- Trigger to update updated_at column on journal_entries table
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON journal_entries
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
 -- Create trigger function to handle new user creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()
