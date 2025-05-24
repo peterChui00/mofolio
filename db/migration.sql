@@ -573,78 +573,78 @@ CREATE POLICY "Users can view their own tag groups"
 ON tag_groups
 FOR SELECT
 TO authenticated
-USING (user_id = auth.uid());
+USING (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can create their own tag groups"
 ON tag_groups
 FOR INSERT
 TO authenticated
-WITH CHECK (user_id = auth.uid());
+WITH CHECK (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can update their own tag groups"
 ON tag_groups
 FOR UPDATE
 TO authenticated
-USING (user_id = auth.uid())
-WITH CHECK (user_id = auth.uid());
+USING (user_id = (SELECT auth.uid()))
+WITH CHECK (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can delete their own tag groups"
 ON tag_groups
 FOR DELETE
 TO authenticated
-USING (user_id = auth.uid());
+USING (user_id = (SELECT auth.uid()));
 
 -- Tag Policies
 CREATE POLICY "Users can view their own tags"
 ON tags
 FOR SELECT
 TO authenticated
-USING (user_id = auth.uid());
+USING (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can create their own tags"
 ON tags
 FOR INSERT
 TO authenticated
-WITH CHECK (user_id = auth.uid());
+WITH CHECK (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can update their own tags"
 ON tags
 FOR UPDATE
 TO authenticated
-USING (user_id = auth.uid())
-WITH CHECK (user_id = auth.uid());
+USING (user_id = (SELECT auth.uid()))
+WITH CHECK (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can delete their own tags"
 ON tags
 FOR DELETE
 TO authenticated
-USING (user_id = auth.uid());
+USING (user_id = (SELECT auth.uid()));
 
 -- Portfolio Policies
 CREATE POLICY "Users can view their own portfolios"
 ON portfolios
 FOR SELECT
 TO authenticated
-USING (user_id = auth.uid());
+USING (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can create their own portfolios"
 ON portfolios
 FOR INSERT
 TO authenticated
-WITH CHECK (user_id = auth.uid());
+WITH CHECK (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can update their own portfolios"
 ON portfolios
 FOR UPDATE
 TO authenticated
-USING (user_id = auth.uid())
-WITH CHECK (user_id = auth.uid());
+USING (user_id = (SELECT auth.uid()))
+WITH CHECK (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can delete their own portfolios"
 ON portfolios
 FOR DELETE
 TO authenticated
-USING (user_id = auth.uid());
+USING (user_id = (SELECT auth.uid()));
 
 -- Trade Policies
 CREATE POLICY "Users can view their own trades"
@@ -653,7 +653,7 @@ FOR SELECT
 TO authenticated
 USING (
   portfolio_id IN (
-    SELECT id FROM portfolios WHERE user_id = auth.uid()
+    SELECT id FROM portfolios WHERE user_id = (SELECT auth.uid())
   )
 );
 
@@ -663,7 +663,7 @@ FOR INSERT
 TO authenticated
 WITH CHECK (
   portfolio_id IN (
-    SELECT id FROM portfolios WHERE user_id = auth.uid()
+    SELECT id FROM portfolios WHERE user_id = (SELECT auth.uid())
   )
 );
 
@@ -673,12 +673,12 @@ FOR UPDATE
 TO authenticated
 USING (
   portfolio_id IN (
-    SELECT id FROM portfolios WHERE user_id = auth.uid()
+    SELECT id FROM portfolios WHERE user_id = (SELECT auth.uid())
   )
 )
 WITH CHECK (
   portfolio_id IN (
-    SELECT id FROM portfolios WHERE user_id = auth.uid()
+    SELECT id FROM portfolios WHERE user_id = (SELECT auth.uid())
   )
 );
 
@@ -688,7 +688,7 @@ FOR DELETE
 TO authenticated
 USING (
   portfolio_id IN (
-    SELECT id FROM portfolios WHERE user_id = auth.uid()
+    SELECT id FROM portfolios WHERE user_id = (SELECT auth.uid())
   )
 );
 
@@ -701,10 +701,10 @@ USING (
   trade_id IN (
     SELECT trades.id FROM trades
     JOIN portfolios ON trades.portfolio_id = portfolios.id
-    WHERE portfolios.user_id = auth.uid()
+    WHERE portfolios.user_id = (SELECT auth.uid())
   )
   AND tag_id IN (
-    SELECT id FROM tags WHERE user_id = auth.uid()
+    SELECT id FROM tags WHERE user_id = (SELECT auth.uid())
   )
 );
 
@@ -716,10 +716,10 @@ WITH CHECK (
   trade_id IN (
     SELECT trades.id FROM trades
     JOIN portfolios ON trades.portfolio_id = portfolios.id
-    WHERE portfolios.user_id = auth.uid()
+    WHERE portfolios.user_id = (SELECT auth.uid())
   )
   AND tag_id IN (
-    SELECT id FROM tags WHERE user_id = auth.uid()
+    SELECT id FROM tags WHERE user_id = (SELECT auth.uid())
   )
 );
 
@@ -731,10 +731,10 @@ USING (
   trade_id IN (
     SELECT trades.id FROM trades
     JOIN portfolios ON trades.portfolio_id = portfolios.id
-    WHERE portfolios.user_id = auth.uid()
+    WHERE portfolios.user_id = (SELECT auth.uid())
   )
   AND tag_id IN (
-    SELECT id FROM tags WHERE user_id = auth.uid()
+    SELECT id FROM tags WHERE user_id = (SELECT auth.uid())
   )
 );
 
@@ -747,7 +747,7 @@ USING (
   trade_id IN (
     SELECT trades.id FROM trades
     JOIN portfolios ON trades.portfolio_id = portfolios.id
-    WHERE portfolios.user_id = auth.uid()
+    WHERE portfolios.user_id = (SELECT auth.uid())
   )
 );
 
@@ -759,7 +759,7 @@ WITH CHECK (
   trade_id IN (
     SELECT trades.id FROM trades
     JOIN portfolios ON trades.portfolio_id = portfolios.id
-    WHERE portfolios.user_id = auth.uid()
+    WHERE portfolios.user_id = (SELECT auth.uid())
   )
 );
 
@@ -771,14 +771,14 @@ USING (
   trade_id IN (
     SELECT trades.id FROM trades
     JOIN portfolios ON trades.portfolio_id = portfolios.id
-    WHERE portfolios.user_id = auth.uid()
+    WHERE portfolios.user_id = (SELECT auth.uid())
   )
 )
 WITH CHECK (
   trade_id IN (
     SELECT trades.id FROM trades
     JOIN portfolios ON trades.portfolio_id = portfolios.id
-    WHERE portfolios.user_id = auth.uid()
+    WHERE portfolios.user_id = (SELECT auth.uid())
   )
 );
 
@@ -790,45 +790,45 @@ USING (
   trade_id IN (
     SELECT trades.id FROM trades
     JOIN portfolios ON trades.portfolio_id = portfolios.id
-    WHERE portfolios.user_id = auth.uid()
+    WHERE portfolios.user_id = (SELECT auth.uid())
   )
 );
 
 -- Journal Folder Policies
 CREATE POLICY "Users can view their own journal folders" ON journal_folders
     FOR SELECT TO authenticated
-        USING (user_id = auth.uid ());
+        USING (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can create their own journal folders" ON journal_folders
     FOR INSERT TO authenticated
-        WITH CHECK (user_id = auth.uid ());
+        WITH CHECK (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can update their own journal folders" ON journal_folders
     FOR UPDATE TO authenticated
-        USING (user_id = auth.uid ())
-        WITH CHECK (user_id = auth.uid ());
+        USING (user_id = (SELECT auth.uid()))
+        WITH CHECK (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can delete their own journal folders" ON journal_folders
     FOR DELETE TO authenticated
-        USING (user_id = auth.uid ());
+        USING (user_id = (SELECT auth.uid()));
 
 -- Journal Entry Policies
 CREATE POLICY "Users can view their own journal entries" ON journal_entries
     FOR SELECT TO authenticated
-        USING (user_id = auth.uid ());
+        USING (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can insert their own journal entries" ON journal_entries
     FOR INSERT TO authenticated
-        WITH CHECK (user_id = auth.uid ());
+        WITH CHECK (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can update their own journal entries" ON journal_entries
     FOR UPDATE TO authenticated
-        USING (user_id = auth.uid ())
-        WITH CHECK (user_id = auth.uid ());
+        USING (user_id = (SELECT auth.uid()))
+        WITH CHECK (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can delete their own journal entries" ON journal_entries
     FOR DELETE TO authenticated
-        USING (user_id = auth.uid ());
+        USING (user_id = (SELECT auth.uid()));
 
 -- Journal Entry Tag Policies
 CREATE POLICY "Users can view their own journal entry tags"
@@ -839,13 +839,13 @@ USING (
   EXISTS (
     SELECT 1 FROM journal_entries
     WHERE journal_entries.id = journal_entry_tags.journal_entry_id
-      AND journal_entries.user_id = auth.uid()
+      AND journal_entries.user_id = (SELECT auth.uid())
   )
   AND
   EXISTS (
     SELECT 1 FROM tags
     WHERE tags.id = journal_entry_tags.tag_id
-      AND tags.user_id = auth.uid()
+      AND tags.user_id = (SELECT auth.uid())
   )
 );
 
@@ -857,13 +857,13 @@ WITH CHECK (
   EXISTS (
     SELECT 1 FROM journal_entries
     WHERE journal_entries.id = journal_entry_tags.journal_entry_id
-      AND journal_entries.user_id = auth.uid()
+      AND journal_entries.user_id = (SELECT auth.uid())
   )
   AND
   EXISTS (
     SELECT 1 FROM tags
     WHERE tags.id = journal_entry_tags.tag_id
-      AND tags.user_id = auth.uid()
+      AND tags.user_id = (SELECT auth.uid())
   )
 );
 
@@ -875,30 +875,30 @@ USING (
   EXISTS (
     SELECT 1 FROM journal_entries
     WHERE journal_entries.id = journal_entry_tags.journal_entry_id
-      AND journal_entries.user_id = auth.uid()
+      AND journal_entries.user_id = (SELECT auth.uid())
   )
   AND
   EXISTS (
     SELECT 1 FROM tags
     WHERE tags.id = journal_entry_tags.tag_id
-      AND tags.user_id = auth.uid()
+      AND tags.user_id = (SELECT auth.uid())
   )
 );
 
 -- Journal Template Policies
 CREATE POLICY "Users can view their own journal templates" ON journal_templates
     FOR SELECT TO authenticated
-        USING (user_id = auth.uid ());
+        USING (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can insert their own journal templates" ON journal_templates
     FOR INSERT TO authenticated
-        WITH CHECK (user_id = auth.uid ());
+        WITH CHECK (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can update their own journal templates" ON journal_templates
     FOR UPDATE TO authenticated
-        USING (user_id = auth.uid ())
-        WITH CHECK (user_id = auth.uid ());
+        USING (user_id = (SELECT auth.uid()))
+        WITH CHECK (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can delete their own journal templates" ON journal_templates
     FOR DELETE TO authenticated
-        USING (user_id = auth.uid ());
+        USING (user_id = (SELECT auth.uid()));
